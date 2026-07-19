@@ -1,47 +1,36 @@
+// src/pages/AdventurePage.jsx
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { SHOLAT_MOVEMENTS } from '../data/data';
 import TreasureBox from '../components/UI/TreasureBox';
-import { Lock, CheckCircle, Star } from 'lucide-react';
-
-const NODE_POSITIONS = [
-  { x: 10, y: 85 },
-  { x: 28, y: 68 },
-  { x: 48, y: 55 },
-  { x: 68, y: 65 },
-  { x: 82, y: 50 },
-  { x: 68, y: 33 },
-  { x: 48, y: 22 },
-  { x: 30, y: 30 },
-  { x: 14, y: 15 },
-  { x: 50, y: 8  },
-];
+import { Lock, CheckCircle, Star, Sparkles, BookOpen } from 'lucide-react';
 
 export default function Adventure() {
-  const { isKidsMode, profile, completeMovement, adventureLevel, setAdventureLevel } = useApp();
-  const [selectedNode, setSelectedNode] = useState(null);
+  const { userMode, profile, completeMovement } = useApp();
+  const isKidsMode = userMode === 'kids';
+  const [selectedNode, setSelectedNode] = useState(0);
   const [showTreasure, setShowTreasure] = useState(false);
 
-  const completedCount = profile.completedMovements.length;
+  const completedCount = profile?.completedMovements?.length || 0;
 
   const handleNodeClick = (idx) => {
     if (idx > completedCount) return; // locked
-    setSelectedNode(idx === selectedNode ? null : idx);
+    setSelectedNode(idx);
   };
 
   const handleCompleteLevel = (movement) => {
-    const wasNew = !profile.completedMovements.includes(movement.key);
+    const wasNew = !profile?.completedMovements?.includes(movement.key);
     completeMovement(movement.key);
     if (wasNew) {
       setShowTreasure(true);
     }
-    setSelectedNode(null);
   };
 
-  const movement = selectedNode !== null ? SHOLAT_MOVEMENTS[selectedNode] : null;
+  const currentMovement = SHOLAT_MOVEMENTS[selectedNode];
 
   return (
-    <div className="animate-fadeInUp">
+    <div className="animate-fadeInUp" style={{ paddingBottom: '40px' }}>
+      
       {showTreasure && (
         <TreasureBox
           onClose={() => setShowTreasure(false)}
@@ -50,105 +39,302 @@ export default function Adventure() {
         />
       )}
 
-      <div className="section-title">
-        <div className="title-icon">🗺️</div>
-        {isKidsMode ? 'Petualangan Sholat 🌟' : 'Adventure Journey'}
-      </div>
-
-      {/* Progress */}
-      <div className="card mb-4" style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: 'white', border: 'none' }}>
+      {/* Progress Stats Card */}
+      <div className="clay-card mb-4" style={{ 
+        background: 'linear-gradient(135deg, var(--game-purple) 0%, var(--game-purple-dark) 100%)', 
+        color: 'white', border: '3px solid var(--game-dark)', padding: '20px'
+      }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
           <div>
-            <div style={{ fontSize: 12, fontWeight: 800, opacity: 0.8 }}>
-              {isKidsMode ? '🗺️ Perjalanan Sholat' : 'Adventure Progress'}
+            <div style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.8 }}>
+              {isKidsMode ? '🗺️ Progress Petualangan Sholat' : 'Adventure Progress'}
             </div>
-            <div style={{ fontSize: 24, fontWeight: 900, margin: '2px 0' }}>
-              {completedCount}/{SHOLAT_MOVEMENTS.length} Level
+            <div style={{ fontSize: '28px', fontWeight: 900, margin: '4px 0', fontFamily: 'var(--font-headline)' }}>
+              {completedCount} <span style={{ fontSize: '15px', fontWeight: 700, opacity: 0.8 }}>dari {SHOLAT_MOVEMENTS.length} Gerakan Selesai</span>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 12 }}>
-            {completedCount >= SHOLAT_MOVEMENTS.length && (
-              <span style={{ background: 'rgba(255,255,255,0.2)', padding: '6px 14px', borderRadius: 'var(--radius-full)', fontSize: 13, fontWeight: 800 }}>
-                🏆 Master Sholat!
-              </span>
-            )}
+          
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <span style={{ 
+              background: '#fff', color: 'var(--game-purple-dark)', border: '2px solid var(--game-dark)',
+              padding: '6px 14px', borderRadius: '12px', fontSize: '12.5px', fontWeight: 900,
+              boxShadow: '2px 2px 0 var(--game-dark)'
+            }}>
+              ⭐ {profile?.stars || 0} Bintang
+            </span>
+            <span style={{ 
+              background: '#ffe500', color: 'var(--game-dark)', border: '2px solid var(--game-dark)',
+              padding: '6px 14px', borderRadius: '12px', fontSize: '12.5px', fontWeight: 900,
+              boxShadow: '2px 2px 0 var(--game-dark)'
+            }}>
+              💎 {profile?.gems || 0} Gems
+            </span>
           </div>
         </div>
-        <div style={{ marginTop: 10, height: 8, background: 'rgba(255,255,255,0.2)', borderRadius: 'var(--radius-full)', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${(completedCount / SHOLAT_MOVEMENTS.length) * 100}%`, background: 'rgba(255,255,255,0.85)', borderRadius: 'var(--radius-full)', transition: 'width 0.6s ease' }} />
+
+        {/* Progress Bar */}
+        <div style={{ marginTop: '14px', height: '14px', background: 'rgba(0,0,0,0.25)', borderRadius: '10px', overflow: 'hidden', border: '2px solid var(--game-dark)' }}>
+          <div style={{ 
+            height: '100%', 
+            width: `${Math.max(4, (completedCount / SHOLAT_MOVEMENTS.length) * 100)}%`, 
+            background: '#6fff9d', 
+            transition: 'width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)' 
+          }} />
         </div>
       </div>
 
-      <div className="grid-2" style={{ alignItems: 'start' }}>
-        {/* Adventure Map */}
-        <div className="adventure-map" style={{ minHeight: 420 }}>
-          <div style={{ textAlign: 'center', marginBottom: 16, fontWeight: 900, fontSize: 14, color: 'var(--primary-dark)' }}>
-            {isKidsMode ? '🗺️ Peta Petualangan Sholatku' : 'Journey Map'}
-          </div>
+      {/* Main Grid: Figma Doa Collection style */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
+        
+        {/* Figma Stepper Path Card */}
+        <div className="clay-card" style={{ padding: '24px', background: '#fff' }}>
+          <h3 style={{ 
+            fontFamily: 'var(--font-headline)', fontWeight: 900, fontSize: '18px', 
+            color: 'var(--game-dark)', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '8px' 
+          }}>
+            🗺️ Jalur Belajar Sholat Kita!
+          </h3>
 
-          {/* Nodes */}
-          <div style={{ position: 'relative', height: 380 }}>
-            {/* SVG connecting lines */}
-            <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-              {NODE_POSITIONS.slice(0, -1).map((pos, i) => {
-                const next = NODE_POSITIONS[i + 1];
-                const done = i < completedCount - 1;
-                return (
-                  <line
-                    key={i}
-                    x1={`${pos.x}%`} y1={`${pos.y}%`}
-                    x2={`${next.x}%`} y2={`${next.y}%`}
-                    stroke={done ? 'var(--primary)' : 'var(--border-strong)'}
-                    strokeWidth={3}
-                    strokeDasharray={done ? '0' : '6 4'}
-                    strokeLinecap="round"
-                  />
-                );
-              })}
-            </svg>
-
-            {/* Nodes */}
+          {/* Scrollable Horizontal Stepper Track */}
+          <div style={{ 
+            overflowX: 'auto', padding: '16px 8px', display: 'flex', gap: '16px', 
+            alignItems: 'center', position: 'relative', border: '2px solid #E2E8F0', 
+            borderRadius: '16px', background: '#F8FAFC', scrollbarWidth: 'thin'
+          }}>
             {SHOLAT_MOVEMENTS.map((m, i) => {
-              const pos = NODE_POSITIONS[i];
-              const isCompleted = profile.completedMovements.includes(m.key);
+              const isCompleted = profile?.completedMovements?.includes(m.key) || false;
               const isCurrent = i === completedCount;
               const isLocked = i > completedCount;
-              const status = isCompleted ? 'completed' : isCurrent ? 'current' : 'locked';
+              const isSelected = i === selectedNode;
+
+              // Node Background colors
+              let bg = '#E2E8F0';
+              let borderCol = 'var(--game-dark)';
+              let color = '#718096';
+
+              if (isCompleted) {
+                bg = 'var(--game-green-light)';
+                color = 'var(--game-dark)';
+              } else if (isCurrent) {
+                bg = 'var(--game-purple)';
+                color = '#fff';
+              }
+
+              return (
+                <div 
+                  key={m.key} 
+                  style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}
+                >
+                  <div 
+                    onClick={() => !isLocked && handleNodeClick(i)}
+                    style={{
+                      cursor: isLocked ? 'default' : 'pointer',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                      position: 'relative'
+                    }}
+                  >
+                    {/* Circle Node */}
+                    <div style={{
+                      width: '64px', height: '64px', borderRadius: '50%',
+                      border: isSelected ? '4px solid var(--game-purple)' : '3px solid var(--game-dark)',
+                      background: bg, color: color,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px',
+                      boxShadow: isSelected ? '0 0 12px var(--game-purple)' : '3px 3px 0 rgba(0,0,0,0.1)',
+                      transform: isSelected ? 'scale(1.08)' : 'scale(1)',
+                      transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                    }}>
+                      {isCompleted ? '✓' : isLocked ? <Lock size={20} style={{ color: '#94A3B8' }} /> : m.emoji}
+                    </div>
+
+                    {/* Step tag name */}
+                    <span style={{ 
+                      fontSize: '11px', fontWeight: 800, 
+                      color: isSelected ? 'var(--game-purple)' : 'var(--game-dark)',
+                      maxWidth: '80px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                    }}>
+                      {m.nameKids.split(' ')[0]}
+                    </span>
+                  </div>
+
+                  {/* Connecting Line Track */}
+                  {i < SHOLAT_MOVEMENTS.length - 1 && (
+                    <div style={{
+                      width: '40px', height: '6px',
+                      background: isCompleted ? 'var(--game-green-light)' : '#E2E8F0',
+                      border: '2px solid var(--game-dark)',
+                      borderRadius: '4px'
+                    }} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Selected Stage Workspace Detail Card */}
+        {currentMovement && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+            
+            {/* Left: Illustration Card */}
+            <div className="clay-card" style={{ 
+              background: '#fff', border: '3px solid var(--game-dark)', padding: '24px',
+              display: 'flex', flexDirection: 'column', justifyItems: 'center', alignItems: 'center', textAlign: 'center'
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--game-purple)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Level {selectedNode + 1} • {currentMovement.key}
+              </span>
+              
+              <div style={{ 
+                margin: '20px 0', width: '160px', height: '160px', borderRadius: '50%',
+                background: 'linear-gradient(135deg, var(--game-green-light) 0%, #CFFAEA 100%)',
+                border: '3px solid var(--game-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '4px 4px 0 var(--game-dark)', position: 'relative'
+              }}>
+                {currentMovement.image ? (
+                  <img src={currentMovement.image} alt={currentMovement.name} style={{ width: '110px', height: '110px', objectFit: 'contain' }} />
+                ) : (
+                  <div style={{ fontSize: '80px', animation: 'float 3s ease-in-out infinite' }}>{currentMovement.emoji}</div>
+                )}
+              </div>
+
+              <h3 style={{ fontFamily: 'var(--font-headline)', fontWeight: 950, fontSize: '22px', color: 'var(--game-dark)', margin: '0 0 4px' }}>
+                {currentMovement.nameKids}
+              </h3>
+              <p style={{ fontSize: '11px', color: '#64748B', fontWeight: 700, margin: 0 }}>
+                Rujukan: HPT Muhammadiyah
+              </p>
+            </div>
+
+            {/* Right: Reading & Action Card */}
+            <div className="clay-card" style={{ background: '#fff', border: '3px solid var(--game-dark)', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--game-purple)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+                  📖 Lafal Doa Gerakan
+                </span>
+
+                {/* Arabic */}
+                {currentMovement.arabicText ? (
+                  <div style={{ background: '#FAF9F6', border: '2px solid var(--game-dark)', borderRadius: '12px', padding: '12px 16px', marginBottom: '12px', boxShadow: '3px 3px 0 var(--game-dark)' }}>
+                    <div style={{ fontSize: '20px', textAlign: 'right', fontWeight: 600, direction: 'rtl', fontFamily: 'serif', lineHeight: '2.0', color: '#0F172A' }}>
+                      {currentMovement.arabicText}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ background: '#F1F5F9', border: '2px solid var(--game-dark)', borderRadius: '12px', padding: '10px 14px', marginBottom: '12px', fontSize: '12px', fontWeight: 700, color: '#64748B', fontStyle: 'italic' }}>
+                    Tanpa bacaan doa khusus (gerakan berdiri/perpindahan).
+                  </div>
+                )}
+
+                {/* Latin */}
+                {currentMovement.latin && (
+                  <p style={{ margin: '0 0 10px', fontSize: '12.5px', fontWeight: 700, fontStyle: 'italic', color: '#334155' }}>
+                    "{currentMovement.latin}"
+                  </p>
+                )}
+
+                {/* Explanation */}
+                <div style={{ background: 'rgba(255, 209, 102, 0.1)', border: '2px solid #FFE8A3', borderRadius: '10px', padding: '12px', marginTop: '12px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 800, color: '#B45309', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>
+                    💡 Cara Gerakannya:
+                  </span>
+                  <p style={{ margin: 0, fontSize: '12.5px', fontWeight: 700, color: '#1E293B', lineHeight: 1.5 }}>
+                    {currentMovement.explanationKids}
+                  </p>
+                </div>
+              </div>
+
+              {/* Complete Level Button */}
+              <div style={{ marginTop: '20px' }}>
+                {(() => {
+                  const isCompleted = profile?.completedMovements?.includes(currentMovement.key) || false;
+                  return (
+                    <button
+                      onClick={() => handleCompleteLevel(currentMovement)}
+                      disabled={isCompleted}
+                      className={isCompleted ? "clay-btn w-full" : "clay-btn yellow w-full"}
+                      style={{ padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: isCompleted ? 0.6 : 1 }}
+                    >
+                      {isCompleted ? (
+                        <>
+                          <CheckCircle size={18} />
+                          Level Selesai Dikuasai ✓
+                        </>
+                      ) : (
+                        <>
+                          <Star size={18} fill="currentColor" />
+                          Selesaikan Level (+50 XP) 🎁
+                        </>
+                      )}
+                    </button>
+                  );
+                })()}
+              </div>
+            </div>
+
+          </div>
+        )}
+
+        {/* Figma Doa List Grid style below */}
+        <div className="clay-card" style={{ padding: '24px', background: '#fff' }}>
+          <h3 style={{ 
+            fontFamily: 'var(--font-headline)', fontWeight: 900, fontSize: '18px', 
+            color: 'var(--game-dark)', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '8px' 
+          }}>
+            <Sparkles size={18} style={{ color: 'var(--game-yellow)' }} />
+            Daftar Pembelajaran Gerakan Sholat
+          </h3>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px' }}>
+            {SHOLAT_MOVEMENTS.map((m, i) => {
+              const isCompleted = profile?.completedMovements?.includes(m.key) || false;
+              const isCurrent = i === completedCount;
+              const isLocked = i > completedCount;
+
+              let statusText = 'Terkunci 🔒';
+              let badgeBg = '#F1F5F9';
+              let badgeColor = '#64748B';
+
+              if (isCompleted) {
+                statusText = 'Selesai ✓';
+                badgeBg = '#ECFDF5';
+                badgeColor = '#047857';
+              } else if (isCurrent) {
+                statusText = 'Sedang Dipelajari ⚡';
+                badgeBg = '#FEF3C7';
+                badgeColor = '#B45309';
+              }
 
               return (
                 <div
                   key={m.key}
+                  onClick={() => !isLocked && handleNodeClick(i)}
                   style={{
-                    position: 'absolute',
-                    left: `${pos.x}%`,
-                    top: `${pos.y}%`,
-                    transform: 'translate(-50%, -50%)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 4,
-                    zIndex: 1,
+                    cursor: isLocked ? 'default' : 'pointer',
+                    padding: '16px', background: '#fff', border: '2.5px solid var(--game-dark)',
+                    borderRadius: '16px', boxShadow: '3px 3px 0 var(--game-dark)',
+                    opacity: isLocked ? 0.5 : 1, display: 'flex', gap: '12px', alignItems: 'center',
+                    backgroundColor: i === selectedNode ? '#ECFDF5' : '#fff',
+                    borderColor: i === selectedNode ? 'var(--game-purple)' : 'var(--game-dark)',
+                    transition: 'all 0.15s'
                   }}
                 >
-                  <div
-                    className={`journey-node ${status}`}
-                    onClick={() => handleNodeClick(i)}
-                    title={isLocked ? 'Selesaikan level sebelumnya' : m.name}
-                  >
-                    {isCompleted ? '✓' : isLocked ? <Lock size={20} /> : m.emoji}
-                  </div>
-                  <div style={{
-                    fontSize: 9.5,
-                    fontWeight: 800,
-                    color: isLocked ? 'var(--text-muted)' : 'var(--text-dark)',
-                    maxWidth: 60,
-                    textAlign: 'center',
-                    lineHeight: 1.2,
-                    background: 'rgba(255,255,255,0.8)',
-                    borderRadius: 4,
-                    padding: '2px 4px',
-                  }}>
-                    {i + 1}. {isKidsMode ? m.nameKids.split(' ')[0] : m.name.split(' ')[0]}
+                  {/* Emoji */}
+                  <span style={{ fontSize: '32px' }}>{isLocked ? '🔒' : m.emoji}</span>
+                  
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ 
+                      fontWeight: 900, fontSize: '13.5px', color: 'var(--game-dark)', 
+                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' 
+                    }}>
+                      {m.nameKids}
+                    </div>
+                    <span style={{
+                      display: 'inline-block', fontSize: '10px', fontWeight: 800, marginTop: '4px',
+                      padding: '2px 8px', borderRadius: '6px', border: '1px solid currentColor',
+                      backgroundColor: badgeBg, color: badgeColor
+                    }}>
+                      {statusText}
+                    </span>
                   </div>
                 </div>
               );
@@ -156,71 +342,6 @@ export default function Adventure() {
           </div>
         </div>
 
-        {/* Selected Node Detail */}
-        <div>
-          {movement ? (
-            <div className="card animate-fadeInUp">
-              <div style={{ background: 'var(--primary-light)', borderRadius: 'var(--radius)', padding: 20, textAlign: 'center', marginBottom: 16 }}>
-                <div style={{ fontSize: 60, marginBottom: 8 }}>{movement.emoji}</div>
-                <div style={{ fontWeight: 900, fontSize: 18, color: 'var(--text-dark)' }}>
-                  {isKidsMode ? movement.nameKids : movement.name}
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 700 }}>Level {selectedNode + 1}</div>
-              </div>
-
-              {movement.arabicText && (
-                <div style={{ background: 'var(--bg)', borderRadius: 'var(--radius)', padding: '12px 16px', marginBottom: 12 }}>
-                  <div className="arabic-text" style={{ fontSize: 20 }}>{movement.arabicText}</div>
-                </div>
-              )}
-
-              <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.7, marginBottom: 16 }}>
-                {isKidsMode ? movement.explanationKids : movement.explanation}
-              </div>
-
-              <button
-                className={`btn w-full ${profile.completedMovements.includes(movement.key) ? 'btn-ghost' : 'btn-primary'}`}
-                onClick={() => handleCompleteLevel(movement)}
-                disabled={profile.completedMovements.includes(movement.key)}
-              >
-                {profile.completedMovements.includes(movement.key)
-                  ? <><CheckCircle size={16} /> Level Selesai ✓</>
-                  : <><Star size={16} /> Selesaikan Level +50 XP 🎁</>}
-              </button>
-            </div>
-          ) : (
-            <div className="card" style={{ textAlign: 'center', padding: 32 }}>
-              <div style={{ fontSize: 56, marginBottom: 16 }}>🗺️</div>
-              <div style={{ fontWeight: 900, color: 'var(--text-dark)', fontSize: 16, marginBottom: 8 }}>
-                {isKidsMode ? 'Pilih Level untuk Dimulai!' : 'Pilih Level di Peta'}
-              </div>
-              <div style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 600, lineHeight: 1.6 }}>
-                {isKidsMode
-                  ? 'Klik salah satu lingkaran di peta untuk mulai belajar gerakan sholat! 🌟'
-                  : 'Klik node pada peta petualangan untuk melihat detail gerakan sholat.'}
-              </div>
-
-              {/* Level list */}
-              <div style={{ marginTop: 20, textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {SHOLAT_MOVEMENTS.map((m, i) => {
-                  const done = profile.completedMovements.includes(m.key);
-                  return (
-                    <div
-                      key={m.key}
-                      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: done ? 'var(--success-light)' : 'var(--bg)', cursor: i <= completedCount ? 'pointer' : 'default', opacity: i > completedCount ? 0.5 : 1 }}
-                      onClick={() => i <= completedCount && handleNodeClick(i)}
-                    >
-                      <span style={{ fontSize: 16 }}>{done ? '✅' : i === completedCount ? '▶️' : '🔒'}</span>
-                      <span style={{ fontSize: 12.5, fontWeight: 700, color: done ? '#166534' : 'var(--text-dark)' }}>
-                        {i + 1}. {isKidsMode ? m.nameKids : m.name}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

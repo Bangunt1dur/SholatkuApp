@@ -1,21 +1,24 @@
+// src/pages/SholatGuidePage.jsx
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, Volume2, Mic, Check, BookOpen } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { SHOLAT_MOVEMENTS } from '../data/data';
 import AudioPlayer from '../components/UI/AudioPlayer';
 
-const YOUTUBE_VIDEO_ID = 'TqRvfvAMtOc'; // Video tata cara sholat
+const YOUTUBE_VIDEO_ID = 'TqRvfvAMtOc'; // Video tutorial sholat
 
 export default function PrayerGuide() {
-  const { isKidsMode, profile, completeMovement } = useApp();
+  const { userMode, profile, movements, completeMovement } = useApp();
   const [currentIdx, setCurrentIdx] = useState(0);
   const [autoplay, setAutoplay] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [justCompleted, setJustCompleted] = useState(false);
 
-  const movement = SHOLAT_MOVEMENTS[currentIdx];
-  const isCompleted = profile.completedMovements.includes(movement.key);
-  const totalCount = SHOLAT_MOVEMENTS.length;
+  const isKidsMode = userMode === 'kids';
+  const movement = movements[currentIdx];
+  
+  const completedMovements = profile?.completedMovements || [];
+  const isCompleted = completedMovements.includes(movement?.key);
+  const totalCount = movements.length;
 
   const goNext = () => {
     if (currentIdx < totalCount - 1) setCurrentIdx(i => i + 1);
@@ -32,224 +35,457 @@ export default function PrayerGuide() {
   };
 
   const handleMarkComplete = () => {
-    if (!isCompleted) {
+    if (!isCompleted && profile) {
       completeMovement(movement.key);
       setJustCompleted(true);
       setTimeout(() => setJustCompleted(false), 2000);
     }
   };
 
+  if (!movement) {
+    return (
+      <div style={{ textAlign: 'center', padding: '40px' }}>
+        <h3>Belum Ada Data Gerakan Sholat</h3>
+        <p>Silakan buat data gerakan sholat melalui Panel Admin terlebih dahulu.</p>
+      </div>
+    );
+  }
+
+  const isAdultTheme = userMode === 'adult' || userMode === 'parent' || userMode === 'admin';
+
+  // ─── KIDS LAYOUT: FIGMA MOCKUP 1 (Interaction Update) ───
+  if (isKidsMode) {
+    return (
+      <div className="animate-fadeIn" style={{ padding: '16px', maxWidth: '1100px', margin: '0 auto' }}>
+        
+        {/* Bento Grid: 2 Columns */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', alignItems: 'stretch', marginBottom: '20px' }}>
+          
+          {/* Left Column: Movement Info & Readings */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            
+            {/* Green Card: Movement Info */}
+            <div className="clay-card" style={{ 
+              background: '#6fff9d', border: '3px solid var(--game-dark)', padding: '20px',
+              display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '220px'
+            }}>
+              <div>
+                <span style={{ 
+                  background: '#fff', border: '2px solid var(--game-dark)', padding: '4px 10px', 
+                  borderRadius: '99px', fontSize: '11px', fontWeight: 900, color: 'var(--game-dark)', display: 'inline-block' 
+                }}>
+                  Gerakan ke-{currentIdx + 1}
+                </span>
+                <h3 style={{ fontFamily: 'var(--font-headline)', fontSize: '26px', fontWeight: 950, color: 'var(--game-dark)', margin: '12px 0 6px' }}>
+                  {movement.nameKids}
+                </h3>
+                <p style={{ fontSize: '13px', fontWeight: 800, color: 'var(--game-dark)', lineHeight: 1.4, opacity: 0.8, margin: 0 }}>
+                  {movement.explanationKids}
+                </p>
+              </div>
+
+              {/* Prev / Next buttons inside the card */}
+              <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+                <button 
+                  onClick={goPrev} 
+                  disabled={currentIdx === 0}
+                  className="clay-btn" 
+                  style={{ flex: 1, padding: '8px 12px', fontSize: '12px', opacity: currentIdx === 0 ? 0.5 : 1 }}
+                >
+                  <ChevronLeft size={14} /> Sebelumnya
+                </button>
+                <button 
+                  onClick={goNext} 
+                  disabled={currentIdx === totalCount - 1}
+                  className="clay-btn yellow" 
+                  style={{ flex: 1, padding: '8px 12px', fontSize: '12px', opacity: currentIdx === totalCount - 1 ? 0.5 : 1 }}
+                >
+                  Selanjutnya <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+
+            {/* Purple Card: Arabic Text Box */}
+            <div className="clay-card purple" style={{ 
+              border: '3px solid var(--game-dark)', padding: '20px', textAlign: 'center' 
+            }}>
+              <span style={{ fontSize: '10.5px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.9, display: 'block', marginBottom: '8px' }}>
+                BACAAN BENTUK ARAB
+              </span>
+
+              {/* White reading box */}
+              {movement.arabicText ? (
+                <div style={{ background: '#fff', border: '3.5px solid var(--game-dark)', borderRadius: '14px', padding: '14px', marginBottom: '10px', boxShadow: '3px 3px 0 var(--game-dark)' }}>
+                  <div style={{ fontSize: '22px', fontWeight: 600, direction: 'rtl', fontFamily: 'serif', lineHeight: '2.0', color: 'var(--game-dark)' }}>
+                    {movement.arabicText}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ background: 'rgba(0,0,0,0.15)', border: '2px dashed #fff', borderRadius: '12px', padding: '14px', marginBottom: '10px', fontSize: '12px', fontWeight: 700 }}>
+                  Tidak ada bacaan doa khusus (gerakan berdiri/perpindahan).
+                </div>
+              )}
+
+              {/* Latin & Translation */}
+              {movement.latin && (
+                <p style={{ margin: '4px 0', fontSize: '12.5px', fontWeight: 800, color: '#fff', fontStyle: 'italic' }}>
+                  "{movement.latin}"
+                </p>
+              )}
+            </div>
+
+          </div>
+
+          {/* Right Column: Illustration Card */}
+          <div className="clay-card" style={{ 
+            background: '#fff', border: '3px solid var(--game-dark)', padding: '20px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative'
+          }}>
+            {/* Status tag top right */}
+            <span style={{
+              position: 'absolute', top: '16px', right: '16px', zIndex: 5,
+              background: '#6fff9d', color: 'var(--game-dark)', border: '2.5px solid var(--game-dark)',
+              padding: '4px 12px', borderRadius: '99px', fontSize: '11px', fontWeight: 900,
+              boxShadow: '2px 2px 0 var(--game-dark)'
+            }}>
+              {isCompleted ? 'Sudah Dikuasai! ✓' : 'Hampir Selesai! ⚡'}
+            </span>
+
+            {/* Illustration */}
+            <div style={{ 
+              width: '100%', height: '100%', minHeight: '260px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative'
+            }}>
+              {movement.image ? (
+                <img 
+                  src={movement.image} 
+                  alt={movement.name} 
+                  style={{ width: '220px', height: '220px', objectFit: 'contain', animation: 'float 3s ease-in-out infinite' }} 
+                />
+              ) : (
+                <div style={{ fontSize: '120px', animation: 'float 3s ease-in-out infinite' }}>
+                  {movement.emoji || '🕌'}
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Bottom Actions Row: Dengarkan, Uji Bacaan, Selesai */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
+          
+          <button 
+            onClick={() => {
+              if (movement.audioUrl) {
+                const audio = new Audio(movement.audioUrl);
+                audio.play().catch(() => alert('Gagal memutar audio.'));
+              } else {
+                alert('Audio pelafalan tidak tersedia.');
+              }
+            }}
+            className="clay-btn" 
+            style={{ padding: '14px', fontSize: '14.5px', border: '3px solid var(--game-dark)', boxShadow: '4px 4px 0 var(--game-dark)' }}
+          >
+            <Volume2 size={16} /> Dengarkan
+          </button>
+          
+          <button 
+            onClick={() => alert('Simulasi Uji Bacaan: Bacalah doa di atas dengan suara lantang! 🎙️')}
+            className="clay-btn" 
+            style={{ padding: '14px', fontSize: '14.5px', border: '3px solid var(--game-dark)', boxShadow: '4px 4px 0 var(--game-dark)' }}
+          >
+            <Mic size={16} /> Uji Bacaan
+          </button>
+          
+          <button 
+            onClick={handleMarkComplete}
+            disabled={isCompleted}
+            className="clay-btn purple" 
+            style={{ 
+              padding: '14px', fontSize: '14.5px', border: '3px solid var(--game-dark)', 
+              boxShadow: '4px 4px 0 var(--game-dark)',
+              background: 'var(--game-purple)', borderColor: 'var(--game-dark)',
+              opacity: isCompleted ? 0.6 : 1
+            }}
+          >
+            <Check size={16} /> {isCompleted ? 'Selesai ✓' : 'Selesai 🎉'}
+          </button>
+
+        </div>
+
+        {/* Audio Hidden Track if auto playing */}
+        {movement.audioUrl && (
+          <div style={{ display: 'none' }}>
+            <AudioPlayer
+              src={movement.audioUrl}
+              onEnded={handleAudioEnded}
+              autoPlay={autoplay}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ─── ADULT/ADMIN CLEAN LAYOUT ───
   return (
-    <div className="animate-fadeInUp">
-      <div className="section-title">
-        <div className="title-icon">📖</div>
-        {isKidsMode ? 'Belajar Gerakan Sholat 🌟' : 'Panduan Gerakan Sholat'}
+    <div className="animate-fadeIn" style={{ padding: '16px' }}>
+      
+      {/* Title */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #E2E8F0', paddingBottom: '12px', marginBottom: '24px' }}>
+        <BookOpen size={20} style={{ color: '#065F46' }} />
+        <h2 style={{ 
+          fontFamily: 'Playfair Display, serif', 
+          fontSize: '24px', fontWeight: 700, 
+          color: '#0F172A', 
+          margin: 0 
+        }}>
+          Panduan Ibadah Sholat Muhammadiyah
+        </h2>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 20 }}>
-        {/* Movement List Sidebar */}
-        {/* Ubah .card menjadi .clay-card agar empuk */}
-        <div className="clay-card" style={{ position: 'sticky', top: 20, alignSelf: 'flex-start', maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
-          <div style={{ fontWeight: 900, fontSize: 13, color: 'var(--text-dark)', marginBottom: 10 }}>
-            📋 Daftar Gerakan
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 280px)) 1fr', gap: 20, alignItems: 'start' }}>
+        
+        {/* Left Sidebar: Movement List */}
+        <div 
+          style={{ 
+            background: '#fff',
+            border: '1px solid #E2E8F0',
+            borderRadius: '10px',
+            padding: '20px 14px',
+            position: 'sticky', top: 20, maxHeight: 'calc(100vh - 180px)', overflowY: 'auto' 
+          }}
+        >
+          <div style={{ fontWeight: 900, fontSize: '13px', color: '#1E293B', marginBottom: '12px' }}>
+            📋 Daftar Gerakan:
           </div>
-          <div className="movement-list">
-            {SHOLAT_MOVEMENTS.map((m, i) => {
-              const done = profile.completedMovements.includes(m.key);
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {movements.map((m, i) => {
+              const done = completedMovements.includes(m.key);
+              const isActive = i === currentIdx;
               return (
                 <div
                   key={m.key}
-                  className={`movement-list-item ${i === currentIdx ? 'active' : ''} ${done ? 'completed' : ''}`}
                   onClick={() => setCurrentIdx(i)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '10px', padding: '10px',
+                    borderRadius: '8px', cursor: 'pointer',
+                    backgroundColor: isActive ? '#ECFDF5' : 'transparent',
+                    border: isActive ? '1px solid #A7F3D0' : '1px solid transparent',
+                    color: isActive ? '#047857' : '#4A5568',
+                    transition: 'all 0.15s'
+                  }}
                 >
-                  <div className={`movement-list-num ${i === currentIdx ? 'active' : ''} ${done ? 'completed' : ''}`}>
+                  <div style={{
+                    width: '24px', height: '24px', borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '11px', fontWeight: 900,
+                    backgroundColor: done ? '#059669' : '#E2E8F0',
+                    color: done ? '#fff' : '#718096'
+                  }}>
                     {done ? '✓' : i + 1}
                   </div>
-                  <div>
-                    <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--text-dark)', lineHeight: 1.3 }}>
-                      {isKidsMode ? m.nameKids : m.name}
-                    </div>
-                  </div>
+                  <span style={{ fontSize: '12.5px', fontWeight: 700 }}>
+                    {m.name}
+                  </span>
                 </div>
               );
             })}
           </div>
 
           {/* Autoplay Toggle */}
-          <div style={{ marginTop: 14, padding: '10px 0', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
+          <div style={{ marginTop: 14, padding: '10px 0', borderTop: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748B' }}>Putar Otomatis</span>
             <div className="autoplay-toggle" onClick={() => setAutoplay(a => !a)}>
-              <div className={`toggle-track ${autoplay ? 'on' : ''}`}>
-                <div className="toggle-thumb" />
+              <div className={`toggle-track ${autoplay ? 'on' : ''}`} style={{ width: '40px', height: '20px', backgroundColor: autoplay ? '#059669' : '#CBD5E0', borderRadius: '10px', position: 'relative', cursor: 'pointer' }}>
+                <div className="toggle-thumb" style={{ width: '14px', height: '14px', backgroundColor: '#fff', borderRadius: '50%', position: 'absolute', top: '3px', left: autoplay ? '23px' : '3px', transition: 'left 0.2s' }} />
               </div>
-              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--mint-dark)' }}>
-                {autoplay ? '🔄 Autoplay ON' : '⏸ Autoplay OFF'}
-              </span>
             </div>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div>
-          <div className="prayer-movement-card mb-4" key={movement.id}>
+        {/* Right Main Panel */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* Main Card */}
+          <div 
+            className="clay-card"
+            style={{ 
+              background: '#fff',
+              border: '1px solid #E2E8F0',
+              borderRadius: '12px',
+              padding: '24px'
+            }}
+          >
             
-            {/* 👇👇 BAGIAN GAMBAR DIMULAI DARI SINI 👇👇 */}
-            <div className="movement-image clay-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '30px', position: 'relative', marginBottom: '16px' }}>
-              <img 
-                src={movement.image} 
-                alt={movement.name} 
-                style={{ width: '160px', height: '160px', objectFit: 'contain', animation: 'float 3s ease-in-out infinite' }} 
-              />
-              <div style={{ position: 'absolute', top: 12, left: 12, background: 'var(--mint-dark)', color: 'white', width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 13 }}>
+            {/* Visual Header */}
+            <div style={{ 
+              background: '#FAF9F6',
+              borderBottom: '1px solid #E2E8F0',
+              borderRadius: '12px', padding: '24px', display: 'flex', justifyContent: 'center', alignItems: 'center',
+              position: 'relative', marginBottom: '20px'
+            }}>
+              {movement.image ? (
+                <img 
+                  src={movement.image} 
+                  alt={movement.name} 
+                  style={{ width: '150px', height: '150px', objectFit: 'contain' }} 
+                />
+              ) : (
+                <div style={{ fontSize: '70px' }}>
+                  {movement.emoji || '🕌'}
+                </div>
+              )}
+              <div style={{ position: 'absolute', top: 12, left: 12, background: '#065F46', color: 'white', width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 13 }}>
                 {currentIdx + 1}
               </div>
             </div>
-            {/* 👆👆 BAGIAN GAMBAR BERAKHIR DI SINI 👆👆 */}
 
-            {/* Content */}
-            <div className="movement-content">
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
-                <div>
-                  <div className="movement-name" style={{ fontSize: '24px', fontWeight: '900', color: 'var(--mint-dark)' }}>
-                    {isKidsMode ? movement.nameKids : movement.name}
-                  </div>
-                </div>
-                {isCompleted ? (
-                  <span className="badge" style={{ background: '#E0F5EE', color: '#3BA37B', padding: '6px 12px', borderRadius: '12px', fontWeight: '800' }}>✓ Selesai</span>
-                ) : (
-                  <span className="badge" style={{ background: '#FFD166', color: '#CC9900', padding: '6px 12px', borderRadius: '12px', fontWeight: '800' }}>Belum</span>
-                )}
+            {/* Info details */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ 
+                  fontFamily: 'Playfair Display, serif',
+                  fontSize: '22px', fontWeight: 900, color: '#0F172A', margin: 0
+                }}>
+                  {movement.name}
+                </h3>
+                <span style={{ fontSize: '11px', color: '#718096', fontWeight: 700 }}>
+                  Rujukan: {movement.source || 'HPT Muhammadiyah'}
+                </span>
               </div>
-
-              {/* Arabic Text */}
-              {movement.arabicText && (
-                <div style={{ background: 'rgba(126, 224, 185, 0.2)', borderRadius: 'var(--radius-clay)', padding: '16px 20px', marginBottom: 14, borderLeft: '4px solid var(--mint-base)' }}>
-                  <div className="arabic-text" style={{ fontSize: '22px', textAlign: 'right' }}>{movement.arabicText}</div>
-                </div>
-              )}
-
-              {/* Latin & Translation */}
-              {movement.latin && (
-                <div style={{ marginBottom: 10 }}>
-                  <div style={{ fontSize: 10.5, fontWeight: 800, color: 'var(--mint-dark)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 3 }}>Latin</div>
-                  <div className="latin-text" style={{ fontStyle: 'italic', fontWeight: '600' }}>{movement.latin}</div>
-                </div>
-              )}
-              {movement.translation && (
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 10.5, fontWeight: 800, color: 'var(--mint-dark)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 3 }}>Terjemahan</div>
-                  <div className="translation-text" style={{ fontWeight: '600' }}>{movement.translation}</div>
-                </div>
-              )}
-
-              {/* Explanation */}
-              <div style={{ background: isKidsMode ? '#FFD16620' : 'rgba(126, 224, 185, 0.2)', borderRadius: 'var(--radius-clay)', padding: '16px', marginBottom: 14 }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: isKidsMode ? '#CC9900' : 'var(--mint-dark)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                  {isKidsMode ? '💡 Penjelasan untuk Kamu' : 'ℹ️ Penjelasan'}
-                </div>
-                <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.7, fontWeight: '600' }}>
-                  {isKidsMode ? movement.explanationKids : movement.explanation}
-                </div>
-              </div>
-
-              {/* Audio Player */}
-              {movement.audioUrl && (
-                <div style={{ marginBottom: 14 }}>
-                  <AudioPlayer
-                    src={movement.audioUrl}
-                    label={`Bacaan — ${isKidsMode ? movement.nameKids : movement.name}`}
-                    onEnded={handleAudioEnded}
-                    autoPlay={autoplay}
-                  />
-                </div>
-              )}
-
-              {/* Mark Complete Button (SUDAH DIPERBAIKI) */}
-              <button 
-                className={`clay-btn w-full ${isCompleted ? '' : 'yellow'}`} 
-                onClick={handleMarkComplete} 
-                disabled={isCompleted}
-                style={{ opacity: isCompleted ? 0.6 : 1 }}
-              >
-                {justCompleted ? (
-                  <><CheckCircle size={18} /> Tandai Selesai! ⭐</>
-                ) : isCompleted ? (
-                  <><CheckCircle size={18} /> Sudah Dipelajari ✓</>
-                ) : (
-                  <>📌 Tandai Sudah Belajar</>
-                )}
-              </button>
             </div>
+
+            {/* Arabic Reading */}
+            {movement.arabicText && (
+              <div style={{ 
+                background: '#FAF9F6', 
+                borderLeft: '4px solid #065F46',
+                borderRadius: '0 12px 12px 0', 
+                padding: '16px 20px', marginBottom: '16px'
+              }}>
+                <div style={{ fontSize: '24px', textAlign: 'right', fontWeight: 600, direction: 'rtl', fontFamily: 'serif', lineHeight: '2.2', color: '#0F172A' }}>
+                  {movement.arabicText}
+                </div>
+              </div>
+            )}
+
+            {/* Latin & Translation */}
+            {movement.latin && (
+              <div style={{ marginBottom: '12px' }}>
+                <span style={{ fontSize: '10px', fontWeight: 900, color: '#059669', textTransform: 'uppercase' }}>Transliterasi</span>
+                <p style={{ margin: '2px 0 0', fontSize: '13.5px', fontWeight: 700, fontStyle: 'italic', color: '#2D3748', lineHeight: 1.4 }}>
+                  {movement.latin}
+                </p>
+              </div>
+            )}
+            {movement.translation && (
+              <div style={{ marginBottom: '20px' }}>
+                <span style={{ fontSize: '10px', fontWeight: 900, color: '#059669', textTransform: 'uppercase' }}>Terjemahan</span>
+                <p style={{ margin: '2px 0 0', fontSize: '13.5px', fontWeight: 700, color: '#4A5568', lineHeight: 1.4 }}>
+                  "{movement.translation}"
+                </p>
+              </div>
+            )}
+
+            {/* Explanation box */}
+            <div style={{ 
+              background: 'rgba(6, 95, 70, 0.05)', 
+              border: '2px solid #A7F3D0',
+              borderRadius: '12px', padding: '16px', marginBottom: '20px' 
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: 900, color: '#047857', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                Kaidah & Fiqih Gerakan
+              </span>
+              <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: '#1E293B', lineHeight: 1.6 }}>
+                {movement.explanationDewasa || movement.explanation}
+              </p>
+            </div>
+
+            {/* Audio Playback */}
+            {movement.audioUrl && (
+              <div style={{ marginBottom: '20px' }}>
+                <AudioPlayer
+                  src={movement.audioUrl}
+                  label={`Pelafalan Bacaan`}
+                  onEnded={handleAudioEnded}
+                  autoPlay={autoplay}
+                />
+              </div>
+            )}
+
           </div>
 
-          {/* Navigation Controls */}
-          <div className="nav-controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
-            
-            {/* Tombol Sebelumnya (SUDAH DIPERBAIKI) */}
-            <button className="clay-btn" onClick={goPrev} disabled={currentIdx === 0} style={{ padding: '10px 16px' }}>
-              <ChevronLeft size={18} /> {isKidsMode ? 'Kembali' : 'Sebelumnya'}
+          {/* Navigation bar controls */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <button 
+              onClick={goPrev} 
+              disabled={currentIdx === 0}
+              className="clay-btn"
+              style={{ padding: '8px 16px', border: '1px solid #CBD5E0' }}
+            >
+              <ChevronLeft size={16} /> Sebelumnya
             </button>
 
-            <div className="step-indicator" style={{ display: 'flex', gap: '8px' }}>
-              {SHOLAT_MOVEMENTS.map((m, i) => (
+            <div style={{ display: 'flex', gap: '6px' }}>
+              {movements.map((m, i) => (
                 <div
                   key={i}
-                  className={`step-dot ${i === currentIdx ? 'active' : ''} ${profile.completedMovements.includes(m.key) ? 'completed' : ''}`}
                   onClick={() => setCurrentIdx(i)}
-                  style={{ 
-                    cursor: 'pointer', 
-                    width: '12px', height: '12px', borderRadius: '50%',
-                    backgroundColor: i === currentIdx ? 'var(--mint-dark)' : profile.completedMovements.includes(m.key) ? 'var(--mint-base)' : '#ccc'
+                  style={{
+                    cursor: 'pointer', width: '10px', height: '10px', borderRadius: '50%',
+                    backgroundColor: i === currentIdx ? '#059669' : (completedMovements.includes(m.key) ? '#34D399' : '#CBD5E0'),
+                    transition: 'all 0.2s'
                   }}
                 />
               ))}
             </div>
 
-            {/* Tombol Selanjutnya (SUDAH DIPERBAIKI) */}
-            <button className="clay-btn yellow" onClick={goNext} disabled={currentIdx === totalCount - 1} style={{ padding: '10px 16px' }}>
-              {isKidsMode ? 'Lanjut' : 'Selanjutnya'} <ChevronRight size={18} />
+            <button 
+              onClick={goNext} 
+              disabled={currentIdx === totalCount - 1}
+              className="clay-btn purple"
+              style={{ padding: '8px 16px' }}
+            >
+              Selanjutnya <ChevronRight size={16} />
             </button>
           </div>
 
-          {/* Video Section */}
-          <div className="clay-card" style={{ marginTop: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <div className="section-title" style={{ margin: 0 }}>
-                <div className="title-icon">🎬</div>
-                <span style={{ fontWeight: 900, color: 'var(--mint-dark)' }}>
-                  {isKidsMode ? 'Video Sholat' : 'Video Tata Cara Sholat'}
-                </span>
-              </div>
-              
-              {/* Tombol Tonton Video (SUDAH DIPERBAIKI) */}
-              <button className="clay-btn" style={{ padding: '8px 16px', fontSize: '14px' }} onClick={() => setShowVideo(v => !v)}>
+          {/* Video Section (Optional collapsible) */}
+          <div 
+            style={{ 
+              background: '#fff',
+              border: '1px solid #E2E8F0',
+              borderRadius: '12px',
+              padding: '20px', marginTop: '12px'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <h4 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 900, color: '#1E293B', margin: 0 }}>
+                🎬 Video Tutorial Sholat
+              </h4>
+              <button 
+                onClick={() => setShowVideo(!showVideo)}
+                className="clay-btn"
+                style={{ padding: '6px 12px', fontSize: '12px' }}
+              >
                 {showVideo ? 'Tutup Video' : 'Tonton Video'}
               </button>
             </div>
-            
+
             {showVideo && (
-              <div className="video-container animate-fadeIn" style={{ borderRadius: 'var(--radius-clay)', overflow: 'hidden' }}>
+              <div style={{ borderRadius: '10px', overflow: 'hidden', aspectRatio: '16/9' }}>
                 <iframe
-                  src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?rel=0&modestbranding=1`}
+                  src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?rel=0`}
                   title="Video Tata Cara Sholat"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  style={{ width: '100%', height: '300px', border: 'none' }}
+                  style={{ width: '100%', height: '100%', border: 'none' }}
                 />
               </div>
             )}
-            
-            {!showVideo && (
-              <div
-                style={{ background: 'rgba(126, 224, 185, 0.2)', borderRadius: 'var(--radius-clay)', height: 140, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', border: '3px dashed var(--mint-base)' }}
-                onClick={() => setShowVideo(true)}
-              >
-                <div style={{ fontSize: 40 }}>▶️</div>
-                <div style={{ fontWeight: 800, color: 'var(--mint-dark)', fontSize: 14 }}>
-                  {isKidsMode ? 'Klik untuk Tonton Video Sholat!' : 'Tonton Video Tata Cara Sholat'}
-                </div>
-              </div>
-            )}
           </div>
+
         </div>
       </div>
     </div>

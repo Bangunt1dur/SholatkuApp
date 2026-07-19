@@ -200,7 +200,8 @@ const QUIZ_TYPES = ['multiple-choice', 'order', 'match'];
 const TYPE_LABELS = { 'multiple-choice': '🔤 Pilih Bacaan', order: '⬆️ Susun Urutan', match: '🎯 Cocokkan Gerakan' };
 
 export default function Quiz() {
-  const { isKidsMode, recordQuizCorrect, profile } = useApp();
+  const { userMode, recordQuizCorrect, profile } = useApp();
+  const isKidsMode = userMode === 'kids';
   const [quizType, setQuizType] = useState('multiple-choice');
   const [questionIdx, setQuestionIdx] = useState(0);
   const [score, setScore] = useState(0);

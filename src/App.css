@@ -466,3 +466,75 @@
   font-weight: 700;
   font-size: 14px;
 }
+
+/* Responsive Desktop Sidebar Layout Locks */
+@media (min-width: 1024px) {
+  .hamburger-toggle-btn {
+    display: none !important;
+  }
+  
+  aside {
+    transform: translateX(0) !important;
+  }
+  
+  .main-content-wrapper {
+    margin-left: 240px !important;
+  }
+  
+  header {
+    padding-left: 24px !important;
+  }
+}
+
+/* ── MOBILE FIXES ── */
+@media (max-width: 1023px) {
+  /* Padding konten halaman agar tidak mepet tepi */
+  main > div {
+    padding: 12px !important;
+  }
+
+  /* Section title lebih kecil di mobile */
+  .section-title {
+    font-size: 18px !important;
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  .title-icon {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 18px !important;
+  }
+
+  /* Grid otomatis jadi 1 kolom di mobile */
+  .grid-2, .grid-3, .grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Pastikan teks Arab tidak overflow */
+  [dir="rtl"] {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Hamburger button lebih tinggi dari header sticky (z-index 100) */
+  .hamburger-toggle-btn {
+    z-index: 200 !important;
+    top: 8px !important;
+    left: 12px !important;
+    width: 44px !important;
+    height: 44px !important;
+  }
+  
+  /* Kartu di mobile: kurangi padding agar tidak overflow */
+  .clay-card {
+    padding: 14px !important;
+  }
+  
+  /* Tombol clay di mobile: teks tidak terpotong */
+  .clay-btn {
+    white-space: nowrap;
+    font-size: 13px !important;
+  }
+}
+

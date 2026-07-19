@@ -1,35 +1,44 @@
 // src/pages/HomePage.jsx
 import { useApp } from '../context/AppContext';
-import { SHOLAT_MOVEMENTS } from '../data/sholatData';
+import { SHOLAT_MOVEMENTS } from '../data/data';
 import MascotRafi from '../components/Shared/MascotRafi';
 
 export default function HomePage({ setActivePage }) {
   const { profile, prayersDoneToday } = useApp();
-  const completedCount = profile.completedMovements?.length || 0;
+
+  const completedCount = profile?.completedMovements?.length || 0;
   const totalMovements = SHOLAT_MOVEMENTS?.length || 11;
-  const xpPercent = Math.min(100, Math.round((profile.xp / profile.xpToNext) * 100));
+  const xpPercent = profile ? Math.min(100, Math.round((profile.xp / profile.xpToNext) * 100)) : 0;
+
+  if (!profile) {
+    return (
+      <div style={{ padding: '32px', textAlign: 'center', color: 'var(--game-dark)' }}>
+        <h3>Memuat Halaman...</h3>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: '32px 16px', maxWidth: '1000px', margin: '0 auto' }}>
-      
+
       {/* ATAS: AREA HERO HEROAN & ROBOT RAFI */}
       <section style={{ display: 'flex', gap: '24px', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap' }}>
         <div className="mancot-float" style={{ width: '120px', height: '120px', fontSize: '70px', textShadow: '4px 4px 0px #000', textAlign: 'center' }}>
           🤖
         </div>
         <div style={{ flex: 1, minWidth: '280px' }}>
-          <h1 style={{ fontFamily: 'var(--font-headline)', fontSize: '36px', fontWeight: 900, margin: '0 0 4px' }}>
+          <h1 style={{ fontFamily: 'var(--font-headline)', fontSize: '36px', fontWeight: 900, margin: '0 0 4px', color: 'var(--game-dark)' }}>
             Let The <span style={{ color: 'var(--game-purple)', backgroundColor: '#fff', border: '3px solid #000', padding: '0 8px', borderRadius: '8px' }}>Pahala</span> Begin!
           </h1>
-          <p style={{ fontFamily: 'var(--font-body)', fontWeight: 700, opacity: 0.8, margin: 0 }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontWeight: 700, opacity: 0.8, margin: 0, color: 'var(--game-dark)' }}>
             Ready for your daily adventure, Champion? Keep up your streak and collect more gems today!
           </p>
         </div>
       </section>
 
       {/* TENGAH: BENTO GRID STATS (LEVEL, XP, STREAK) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-        
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+
         {/* Card Level (Ungu) */}
         <div className="clay-card purple" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '160px' }}>
           <div>
@@ -72,8 +81,8 @@ export default function HomePage({ setActivePage }) {
       </div>
 
       {/* TRACK PERJALANAN SHOLAT (Your Prayer Journey) */}
-      <h2 style={{ fontSize: '22px', fontWeight: 900, marginBottom: '16px' }}>Misi Hari Ini</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
+      <h2 style={{ fontSize: '22px', fontWeight: 900, marginBottom: '16px', color: 'var(--game-dark)' }}>Misi Hari Ini</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         <div className="clay-card" style={{ cursor: 'pointer' }} onClick={() => setActivePage('prayer-guide')}>
           <div style={{ fontSize: '32px', marginBottom: '8px' }}>📖</div>
           <h4 style={{ fontSize: '18px', fontWeight: 900, margin: '0 0 4px' }}>Belajar Sholat</h4>
