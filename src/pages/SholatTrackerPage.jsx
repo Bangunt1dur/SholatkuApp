@@ -20,10 +20,10 @@ export default function Tracker() {
         {/* Left: Daily Checklist */}
         <div>
           {/* Today Summary */}
-          <div className="card mb-4" style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: 'white', border: 'none' }}>
+          <div className="card mb-4" style={{ background: 'linear-gradient(135deg, var(--game-purple-dark) 0%, var(--game-purple) 100%)', color: 'white', border: '4px solid #000', boxShadow: '6px 6px 0px #000', borderRadius: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 800, opacity: 0.8, marginBottom: 2 }}>
+                <div style={{ fontSize: 13, fontWeight: 900, opacity: 0.9, textTransform: 'uppercase' }}>
                   {isKidsMode ? '🙏 Sholat Hari Ini' : "Today's Prayer"}
                 </div>
                 <div style={{ fontSize: 32, fontWeight: 900 }}>
@@ -31,15 +31,15 @@ export default function Tracker() {
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 13, fontWeight: 800, opacity: 0.8, marginBottom: 2 }}>🔥 Streak</div>
+                <div style={{ fontSize: 13, fontWeight: 900, opacity: 0.9, textTransform: 'uppercase' }}>🔥 Streak</div>
                 <div style={{ fontSize: 32, fontWeight: 900 }}>{profile.streak}<span style={{ fontSize: 14, opacity: 0.7 }}> hari</span></div>
               </div>
             </div>
-            <div style={{ height: 10, background: 'rgba(255,255,255,0.2)', borderRadius: 'var(--radius-full)', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${prayerProgress}%`, background: 'rgba(255,255,255,0.85)', borderRadius: 'var(--radius-full)', transition: 'width 0.6s ease' }} />
+            <div style={{ height: '24px', backgroundColor: 'rgba(0,0,0,0.15)', borderRadius: '12px', border: '3px solid #000', padding: '2px', boxSizing: 'border-box', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${prayerProgress}%`, backgroundColor: 'var(--game-green-light)', borderRadius: '6px', borderRight: prayerProgress > 0 ? '2px solid #000' : 'none', transition: 'width 0.6s ease' }} />
             </div>
             {prayersDoneToday === 5 && (
-              <div style={{ marginTop: 10, background: 'rgba(255,255,255,0.15)', borderRadius: 'var(--radius)', padding: '6px 12px', textAlign: 'center', fontSize: 13, fontWeight: 800 }}>
+              <div style={{ marginTop: 14, background: 'var(--game-yellow)', color: '#000', border: '3px solid #000', borderRadius: '12px', padding: '10px', textAlign: 'center', fontSize: 13, fontWeight: 900, boxShadow: '2px 2px 0px #000' }}>
                 🎉 Alhamdulillah! Sholat 5 waktu lengkap hari ini!
               </div>
             )}

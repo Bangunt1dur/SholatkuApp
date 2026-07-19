@@ -1,21 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
-import AppSidebar from './components/shared/Sidebar'; // Sesuai penamaan PascalCase baru kita
-import AppHeader from './components/shared/Header';   // Sesuai penamaan PascalCase baru kita
+import AppSidebar from './components/Shared/Sidebar';
+import AppHeader from './components/Shared/Header';
 import HomePage from './pages/HomePage';
 import SholatGuidePage from './pages/SholatGuidePage';
-import PrayerTrackerPage from './pages/SholatTrackerPage'; // Sesuai penamaan di folder pages
+import PrayerTrackerPage from './pages/SholatTrackerPage';
 import SholatQuizPage from './pages/SholatQuizPage';
 import AdventurePage from './pages/AdventurePage';
 import ProfilePage from './pages/ProfilePage';
-import ParentDashboardPage from './pages/ParentDashboard';
 
-function ParentalGateModal() {
+// Import KEDUA Dashboard (Anak & Orang Tua)
+import ChildDashboardPage from "./pages/DashboardAnak"; 
+import ParentDashboardPage from "./pages/DasboardOrangTua"; // Sesuaikan nama file tanpa 'h' sesuai gambar
+
+import DasboardDewasa from "./pages/DasboardDewasa";
+
+// New Pages Imports
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ProfilePicker from './pages/ProfilePicker';
+
+function ParentalGateModal({ setActivePage }) {
   const { isPinModalOpen, setIsPinModalOpen, toggleMode } = useApp();
   const [pinInput, setPinInput] = useState('');
   const [isError, setIsError] = useState(false);
 
-  const CORRECT_PIN = '1234'; 
+  const CORRECT_PIN = '1234';
 
   if (!isPinModalOpen) return null;
 
@@ -26,6 +37,7 @@ function ParentalGateModal() {
       setIsPinModalOpen(false);
       setPinInput('');
       setIsError(false);
+      setActivePage('parent-dashboard');
     } else {
       setIsError(true);
       setPinInput('');
@@ -34,15 +46,14 @@ function ParentalGateModal() {
 
   return (
     <div style={{
-      position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+      position: 'relative', top: 0, left: 0, width: '100vw', height: '100vh',
       backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
       display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999
     }}>
-      {/* Menggunakan clay-card ber-border tebal figma */}
       <div className="clay-card animate-fadeInUp" style={{ maxWidth: '360px', width: '90%', textAlign: 'center' }}>
         <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔒</div>
-        <h3 style={{ margin: '0 0 8px', fontWeight: 900, color: 'var(--game-purple)' }}>Khusus Orang Tua</h3>
-        <p style={{ fontSize: '14px', fontWeight: 700, color: '#718096', marginBottom: '16px' }}>
+        <h3 style={{ margin: '0 0 8px', fontWeight: 900, color: '#113C2B', letterSpacing: '-0.5px' }}>Khusus Orang Tua</h3>
+        <p style={{ fontSize: '14px', fontWeight: 700, color: '#113C2B', marginBottom: '16px' }}>
           Masukkan 4 digit PIN Ma/Pa untuk mengunci akses anak.
         </p>
 
@@ -54,15 +65,16 @@ function ParentalGateModal() {
             value={pinInput}
             onChange={(e) => {
               setIsError(false);
-              setPinInput(e.target.value.replace(/\D/g, '')); 
+              setPinInput(e.target.value.replace(/\D/g, ''));
             }}
             style={{
-              width: '100%', padding: '12px', fontSize: '24px', letterSpacing: '8px',
+              width: '100%', padding: '12px', paddingLeft: 'calc(12px + 8px)', fontSize: '24px', letterSpacing: '8px',
               textAlign: 'center', borderRadius: '12px', border: isError ? '4px solid var(--pink-clay)' : '4px solid var(--game-dark)',
-              backgroundColor: '#F7FAFC', outline: 'none', marginBottom: '12px', fontWeight: 900
+              backgroundColor: '#F7FAFC', outline: 'none', marginBottom: '12px', fontWeight: 900,
+              boxSizing: 'border-box'
             }}
           />
-          
+
           {isError && (
             <p style={{ color: 'var(--pink-clay)', fontSize: '13px', fontWeight: 800, margin: '0 0 12px' }}>
               ❌ PIN salah! Coba koreksi lagi.
@@ -82,7 +94,7 @@ function ParentalGateModal() {
             >
               Batal
             </button>
-            <button type="submit" className="clay-btn purple" style={{ flex: 1, padding: '10px' }}>
+            <button type="submit" className="clay-btn purple" style={{ flex: 1, padding: '10px', backgroundColor: '#113C2B', borderColor: '#082218', boxShadow: '4px 4px 0px #082218' }}>
               Verifikasi
             </button>
           </div>
@@ -93,10 +105,41 @@ function ParentalGateModal() {
 }
 
 function AppContent() {
-  const [activePage, setActivePage] = useState('home');
-  const { sidebarOpen } = useApp();
+  const { isLoggedIn, activeProfile, sidebarOpen, isKidsMode } = useApp();
+  const [activePage, setActivePage] = useState('landing');
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      if (activePage !== 'login' && activePage !== 'register') {
+        setActivePage('landing');
+      }
+    } else {
+      if (!activeProfile) {
+        setActivePage('profile-picker');
+      } else if (activePage === 'landing' || activePage === 'login' || activePage === 'register' || activePage === 'profile-picker') {
+        // Jika profile anak aktif, arahkan ke home. Jika orang tua, ke parent-dashboard
+        setActivePage(activeProfile === 'anak' ? 'home' : activeProfile === 'dewasa' ? 'adult-quran' : 'parent-dashboard');
+      }
+    }
+  }, [isLoggedIn, activeProfile]);
 
   const renderPage = () => {
+    if (!isLoggedIn) {
+      switch (activePage) {
+        case 'login':
+          return <LoginPage setActivePage={setActivePage} />;
+        case 'register':
+          return <RegisterPage setActivePage={setActivePage} />;
+        case 'landing':
+        default:
+          return <LandingPage setActivePage={setActivePage} />;
+      }
+    }
+
+    if (!activeProfile || activePage === 'profile-picker') {
+      return <ProfilePicker setActivePage={setActivePage} />;
+    }
+
     switch (activePage) {
       case 'home':
         return <HomePage setActivePage={setActivePage} />;
@@ -110,32 +153,54 @@ function AppContent() {
         return <AdventurePage />;
       case 'profile':
         return <ProfilePage />;
+      case 'child-dashboard': // Jalur menu untuk Dashboard Anak
+        return <ChildDashboardPage />;
       case 'parent-dashboard':
-        return <ParentDashboardPage />;
+        return <ParentDashboardPage section="overview" />;
+      case 'parent-punctuality':
+        return <ParentDashboardPage section="punctuality" />;
+      case 'parent-missed':
+        return <ParentDashboardPage section="missed" />;
+      case 'parent-target':
+        return <ParentDashboardPage section="target" />;
+      case 'adult-quran':
+        return <DasboardDewasa section="quran" />;
+      case 'adult-guide':
+        return <DasboardDewasa section="guide" />;
+      case 'adult-schedule':
+        return <DasboardDewasa section="schedule" />;
+      case 'adult-kiblat':
+        return <DasboardDewasa section="kiblat" />;
+      case 'adult-dzikir':
+        return <DasboardDewasa section="dzikir" />;
       default:
         return <HomePage setActivePage={setActivePage} />;
     }
   };
 
+  if (!isLoggedIn || !activeProfile || activePage === 'profile-picker') {
+    return <main style={{ flex: 1, position: 'relative' }}>{renderPage()}</main>;
+  }
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
+    <div className={`main-app-container ${isKidsMode ? 'kids-mode' : 'parent-mode'}`}>
+      {/* Sidebar Utama */}
       <AppSidebar activePage={activePage} setActivePage={setActivePage} />
 
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        marginLeft: sidebarOpen ? '240px' : '0px', 
-        transition: 'margin-left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
-      }}>
-        <AppHeader setActivePage={setActivePage} />
+      {/* Konten Halaman Utama */}
+      <div className={`page-content-wrapper ${sidebarOpen ? 'sidebar-is-open' : 'sidebar-is-closed'}`}>
+        {/* Bungkusan Header */}
+        <div className="header-container-block">
+          <AppHeader setActivePage={setActivePage} />
+        </div>
 
-        <main style={{ flex: 1, position: 'relative' }}>
+        {/* Isi Halaman Utama */}
+        <main className="dashboard-main-core">
           {renderPage()}
         </main>
       </div>
 
-      <ParentalGateModal />
+      <ParentalGateModal setActivePage={setActivePage} />
     </div>
   );
 }

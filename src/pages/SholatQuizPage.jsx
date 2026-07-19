@@ -18,29 +18,42 @@ function MultipleChoiceQuiz({ question, isKidsMode, onAnswer }) {
 
   return (
     <div className="animate-fadeIn">
-      <h3 style={{ fontWeight: 900, fontSize: 17, color: 'var(--text-dark)', lineHeight: 1.4, marginBottom: 20 }}>
+      <h3 style={{ fontWeight: 900, fontSize: 18, color: '#000', lineHeight: 1.4, marginBottom: 20, padding: '16px', background: '#f8fafc', border: '3px solid #000', borderRadius: '16px', boxShadow: '4px 4px 0px #000' }}>
         {isKidsMode ? question.questionKids : question.question}
       </h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {question.options.map((opt, i) => {
-          let cls = 'quiz-option';
-          if (answered) {
-            if (i === question.correct) cls += ' correct';
-            else if (i === selected) cls += ' wrong';
-          } else if (i === selected) cls += ' selected';
+          const isCorrect = answered && i === question.correct;
+          const isWrong = answered && i === selected && i !== question.correct;
+          const isSelected = !answered && i === selected;
           return (
-            <button key={i} className={cls} onClick={() => handleSelect(i)}>
-              <span style={{ fontWeight: 800, color: 'var(--primary)', marginRight: 8 }}>
-                {['A', 'B', 'C', 'D'][i]}.
+            <button
+              key={i}
+              onClick={() => handleSelect(i)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px',
+                padding: '14px 18px', borderRadius: '14px', cursor: answered ? 'default' : 'pointer',
+                fontWeight: 900, fontSize: 14, textAlign: 'left',
+                border: `3px solid #000`,
+                background: isCorrect ? 'var(--game-green-light)' : isWrong ? '#fecdd3' : isSelected ? 'var(--game-yellow)' : '#fff',
+                boxShadow: isCorrect ? '3px 3px 0px #166534' : isWrong ? '3px 3px 0px #be123c' : isSelected ? '3px 3px 0px #000' : '3px 3px 0px #000',
+                transform: isCorrect || isWrong ? 'translate(1px, 1px)' : 'none',
+                transition: 'all 0.1s ease'
+              }}
+            >
+              <span style={{ width: '28px', height: '28px', borderRadius: '50%', border: '2.5px solid #000', backgroundColor: isCorrect ? 'var(--game-green)' : isWrong ? '#f43f5e' : isSelected ? 'var(--game-purple)' : '#e2e8f0', color: isCorrect || isWrong || isSelected ? '#fff' : '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 900, flexShrink: 0 }}>
+                {['A', 'B', 'C', 'D'][i]}
               </span>
               {opt}
+              {isCorrect && <span style={{ marginLeft: 'auto', fontSize: 18 }}>✅</span>}
+              {isWrong && <span style={{ marginLeft: 'auto', fontSize: 18 }}>❌</span>}
             </button>
           );
         })}
       </div>
       {answered && (
-        <div style={{ marginTop: 14, padding: '10px 14px', borderRadius: 'var(--radius)', background: selected === question.correct ? 'var(--success-light)' : 'var(--danger-light)', fontSize: 13, fontWeight: 700, color: selected === question.correct ? '#166534' : '#991B1B' }} className="animate-fadeIn">
-          {selected === question.correct ? '🎉 Benar! ' : '❌ Jawaban kurang tepat. '}
+        <div style={{ marginTop: 16, padding: '14px', borderRadius: '14px', border: '3px solid #000', background: selected === question.correct ? 'var(--game-green-light)' : '#fecdd3', fontSize: 13, fontWeight: 800, color: '#000', boxShadow: '3px 3px 0px #000' }} className="animate-fadeIn">
+          {selected === question.correct ? '🎉 Benar! +15 XP ' : '❌ Jawaban kurang tepat. '}
           {question.explanation}
         </div>
       )}
@@ -89,16 +102,16 @@ function OrderQuiz({ isKidsMode, onAnswer }) {
       <p style={{ fontSize: 12.5, color: 'var(--text-muted)', marginBottom: 16, fontWeight: 600 }}>
         Gunakan tombol ↑↓ untuk mengatur urutan
       </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
         {arranged.map((item, idx) => (
-          <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ width: 22, height: 22, background: 'var(--primary)', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 11, flexShrink: 0 }}>
+          <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ width: 28, height: 28, background: 'var(--game-yellow)', color: '#000', border: '2.5px solid #000', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 13, flexShrink: 0 }}>
               {idx + 1}
             </span>
-            <div className="drag-item" style={{ flex: 1, cursor: 'default' }}>{item.label}</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <button onClick={() => moveUp(idx)} disabled={idx === 0 || checked} style={{ padding: '2px 6px', borderRadius: 4, border: '1px solid var(--border)', background: 'var(--bg-card)', cursor: 'pointer', fontWeight: 800 }}>↑</button>
-              <button onClick={() => moveDown(idx)} disabled={idx === arranged.length - 1 || checked} style={{ padding: '2px 6px', borderRadius: 4, border: '1px solid var(--border)', background: 'var(--bg-card)', cursor: 'pointer', fontWeight: 800 }}>↓</button>
+            <div style={{ flex: 1, padding: '10px 14px', background: '#fff', border: '3px solid #000', borderRadius: '12px', fontWeight: 800, fontSize: 13, boxShadow: '2px 2px 0px #000' }}>{item.label}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <button onClick={() => moveUp(idx)} disabled={idx === 0 || checked} style={{ width: 30, height: 30, borderRadius: '8px', border: '2.5px solid #000', background: '#f8fafc', cursor: 'pointer', fontWeight: 900, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '1px 1px 0px #000' }}>↑</button>
+              <button onClick={() => moveDown(idx)} disabled={idx === arranged.length - 1 || checked} style={{ width: 30, height: 30, borderRadius: '8px', border: '2.5px solid #000', background: '#f8fafc', cursor: 'pointer', fontWeight: 900, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '1px 1px 0px #000' }}>↓</button>
             </div>
           </div>
         ))}
@@ -109,8 +122,8 @@ function OrderQuiz({ isKidsMode, onAnswer }) {
         </button>
       )}
       {checked && (
-        <div style={{ padding: '12px 14px', borderRadius: 'var(--radius)', background: correct ? 'var(--success-light)' : 'var(--danger-light)', fontWeight: 700, color: correct ? '#166534' : '#991B1B', fontSize: 13 }} className="animate-fadeIn">
-          {correct ? '🎉 Urutan sudah benar! Luar biasa!' : '❌ Belum tepat. Urutan sholat: Qiyam → Takbir → Bersedekap → Al-Fatihah → Ruku → I\'tidal → Sujud → Duduk → Tasyahud → Salam'}
+        <div style={{ padding: '14px', borderRadius: '14px', border: '3px solid #000', background: correct ? 'var(--game-green-light)' : '#fecdd3', fontWeight: 900, color: '#000', fontSize: 13, boxShadow: '3px 3px 0px #000' }} className="animate-fadeIn">
+          {correct ? '🎉 Urutan sudah benar! Luar biasa! +15 XP' : "❌ Belum tepat. Urutan sholat: Qiyam → Takbir → Bersedekap → Al-Fatihah → Ruku → I'tidal → Sujud → Duduk → Tasyahud → Salam"}
         </div>
       )}
     </div>
@@ -245,30 +258,42 @@ export default function Quiz() {
       </div>
 
       {/* Quiz Type Selector */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         {QUIZ_TYPES.map((type) => (
           <button
             key={type}
-            className={`btn btn-sm ${quizType === type ? 'btn-primary' : 'btn-outline'}`}
             onClick={() => { setQuizType(type); resetQuiz(); }}
+            style={{
+              padding: '10px 18px',
+              borderRadius: '14px',
+              border: '3px solid #000',
+              fontWeight: 900,
+              fontSize: '14px',
+              cursor: 'pointer',
+              backgroundColor: quizType === type ? 'var(--game-purple)' : '#fff',
+              color: quizType === type ? '#fff' : '#000',
+              boxShadow: quizType === type ? '3px 3px 0px #000' : '2px 2px 0px #000',
+              transform: quizType === type ? 'translate(-1px, -1px)' : 'none',
+              transition: 'all 0.1s ease'
+            }}
           >
             {TYPE_LABELS[type]}
           </button>
         ))}
       </div>
 
-      <div className="grid-2" style={{ alignItems: 'start' }}>
+      <div className="grid-2" style={{ alignItems: 'start', gap: '24px' }}>
         {/* Quiz Area */}
-        <div className="card">
+        <div className="card" style={{ border: '4px solid #000', boxShadow: '6px 6px 0px #000' }}>
           {!finished ? (
             <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid var(--border)' }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)' }}>
-                  {quizType === 'multiple-choice' ? `Soal ${questionIdx + 1} dari ${mcQuestions.length}` : TYPE_LABELS[quizType]}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, paddingBottom: 14, borderBottom: '3px solid #000' }}>
+                <div style={{ fontSize: 13, fontWeight: 900, color: '#000', backgroundColor: '#f1f5f9', border: '2.5px solid #000', padding: '6px 12px', borderRadius: '10px' }}>
+                  {quizType === 'multiple-choice' ? `📝 Soal ${questionIdx + 1} / ${mcQuestions.length}` : TYPE_LABELS[quizType]}
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <span className="badge badge-success">✅ {score}</span>
-                  <span className="badge badge-danger">❌ {total - score}</span>
+                  <span style={{ padding: '4px 12px', borderRadius: '10px', border: '2.5px solid #000', backgroundColor: 'var(--game-green-light)', fontWeight: 900, fontSize: 13 }}>✅ {score}</span>
+                  <span style={{ padding: '4px 12px', borderRadius: '10px', border: '2.5px solid #000', backgroundColor: '#fecdd3', fontWeight: 900, fontSize: 13 }}>❌ {total - score}</span>
                 </div>
               </div>
 
@@ -288,64 +313,62 @@ export default function Quiz() {
               )}
             </>
           ) : (
-            <div className="animate-fadeIn" style={{ textAlign: 'center', padding: 20 }}>
-              <div style={{ fontSize: 64, marginBottom: 16 }}>
+            <div className="animate-fadeIn" style={{ textAlign: 'center', padding: '24px' }}>
+              <div style={{ fontSize: 72, marginBottom: 16, filter: 'drop-shadow(3px 3px 0px rgba(0,0,0,0.2))' }}>
                 {percent >= 80 ? '🏆' : percent >= 60 ? '🌟' : '💪'}
               </div>
-              <h3 style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-dark)', marginBottom: 4 }}>
-                {percent >= 80 ? 'Luar Biasa!' : percent >= 60 ? 'Bagus!' : 'Terus Berlatih!'}
+              <h3 style={{ fontSize: 26, fontWeight: 900, color: '#000', marginBottom: 8 }}>
+                {percent >= 80 ? 'Luar Biasa! 🎉' : percent >= 60 ? 'Bagus Sekali! 👍' : 'Terus Berlatih! 💪'}
               </h3>
-              <div style={{ fontSize: 42, fontWeight: 900, color: 'var(--primary)', margin: '12px 0' }}>
+              <div style={{ fontSize: 52, fontWeight: 900, color: percent >= 60 ? 'var(--game-green)' : '#f43f5e', margin: '16px 0', border: '4px solid #000', borderRadius: '20px', padding: '12px', boxShadow: '4px 4px 0px #000', backgroundColor: percent >= 60 ? 'var(--game-green-light)' : '#fecdd3' }}>
                 {score}/{total}
               </div>
-              <div className="progress-track" style={{ marginBottom: 16 }}>
-                <div className={`progress-fill ${percent >= 60 ? 'success' : 'danger'}`} style={{ width: `${percent}%` }} />
+              <div style={{ height: '24px', backgroundColor: '#e2e8f0', borderRadius: '12px', border: '3px solid #000', padding: '2px', boxSizing: 'border-box', overflow: 'hidden', marginBottom: '16px' }}>
+                <div style={{ height: '100%', width: `${percent}%`, backgroundColor: percent >= 60 ? 'var(--game-green-light)' : '#f87171', borderRadius: '6px', borderRight: percent > 0 ? '2px solid #000' : 'none', transition: 'width 0.6s ease' }} />
               </div>
-              <div style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 600, marginBottom: 20 }}>
+              <div style={{ fontSize: 14, color: '#333', fontWeight: 800, marginBottom: 24, padding: '12px', background: '#f8fafc', border: '3px solid #000', borderRadius: '14px' }}>
                 {isKidsMode
-                  ? `Kamu menjawab ${score} soal dengan benar! ${percent >= 80 ? 'Kamu hebat! ⭐' : 'Coba lagi yuk!'}`
-                  : `Tingkat kebenaran: ${percent}%. ${percent >= 80 ? '+15 XP per jawaban benar.' : 'Pelajari lagi materi sholat.'}`}
+                  ? `Kamu menjawab ${score} soal dengan benar! ${percent >= 80 ? 'Kamu hebat sekali! ⭐' : 'Coba lagi yuk!'}`
+                  : `Akurasi: ${percent}%. ${percent >= 80 ? '+15 XP per jawaban benar!' : 'Pelajari lagi materi sholat ya.'}`}
               </div>
-              <button className="btn btn-primary w-full" onClick={resetQuiz}>
-                <RefreshCw size={16} /> {isKidsMode ? 'Coba Lagi!' : 'Mulai Ulang Quiz'}
+              <button className="btn btn-primary w-full" onClick={resetQuiz} style={{ padding: '14px', fontSize: '16px' }}>
+                <RefreshCw size={16} /> {isKidsMode ? '🔄 Coba Lagi!' : 'Mulai Ulang Quiz'}
               </button>
             </div>
           )}
         </div>
 
         {/* Stats & Tips */}
-        <div>
-          <div className="card mb-4">
-            <div style={{ fontWeight: 900, color: 'var(--text-dark)', fontSize: 14, marginBottom: 12 }}>📊 Statistik Quiz</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, fontWeight: 700 }}>
-                <span style={{ color: 'var(--text)' }}>Total Jawaban Benar</span>
-                <span style={{ color: 'var(--primary)' }}>⭐ {profile.quizCorrect}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, fontWeight: 700 }}>
-                <span style={{ color: 'var(--text)' }}>Gems dari Quiz</span>
-                <span style={{ color: '#7C3AED' }}>💎 {Math.floor(profile.quizCorrect)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, fontWeight: 700 }}>
-                <span style={{ color: 'var(--text)' }}>XP dari Quiz</span>
-                <span style={{ color: 'var(--accent)' }}>⚡ {profile.quizCorrect * 15} XP</span>
-              </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="card" style={{ border: '4px solid #000', boxShadow: '4px 4px 0px #000' }}>
+            <div style={{ fontWeight: 900, color: '#000', fontSize: 15, marginBottom: 16, borderBottom: '3px solid #000', paddingBottom: '8px' }}>📊 STATISTIK QUIZ</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[
+                { label: 'Total Benar', val: `⭐ ${profile.quizCorrect}`, bg: '#fef3c7' },
+                { label: 'Gems Diraih', val: `💎 ${Math.floor(profile.quizCorrect)}`, bg: '#f3e8ff' },
+                { label: 'Total XP', val: `⚡ ${profile.quizCorrect * 15} XP`, bg: '#eff6ff' },
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderRadius: '12px', border: '3px solid #000', backgroundColor: item.bg, boxShadow: '2px 2px 0px #000' }}>
+                  <span style={{ fontSize: 13, fontWeight: 900, color: '#000' }}>{item.label}</span>
+                  <span style={{ fontSize: 14, fontWeight: 900, color: '#000' }}>{item.val}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="card" style={{ background: 'var(--primary-light)', border: '1.5px solid var(--primary-mid)' }}>
-            <div style={{ fontSize: 20, marginBottom: 8 }}>💡</div>
-            <div style={{ fontWeight: 900, color: 'var(--primary-dark)', fontSize: 14, marginBottom: 8 }}>
-              {isKidsMode ? 'Tips Kuis Seru!' : 'Tips & Trik'}
+          <div className="card" style={{ background: 'var(--primary-light)', border: '4px solid #000', boxShadow: '4px 4px 0px #000' }}>
+            <div style={{ fontSize: 28, marginBottom: 8 }}>💡</div>
+            <div style={{ fontWeight: 900, color: '#000', fontSize: 15, marginBottom: 12 }}>
+              {isKidsMode ? '🎯 Tips Kuis Seru!' : '💡 Tips & Trik'}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
                 isKidsMode ? '📖 Belajar dulu baru kuis!' : 'Pelajari materi di Panduan Sholat sebelum quiz',
                 isKidsMode ? '🔄 Kuis bisa diulang berkali-kali!' : 'Semua quiz dapat diulang untuk meningkatkan nilai',
                 isKidsMode ? '⭐ Jawab benar = dapat bintang!' : 'Setiap jawaban benar memberikan +15 XP & 💎',
               ].map((tip, i) => (
-                <div key={i} style={{ fontSize: 12.5, color: 'var(--text)', fontWeight: 600, display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-                  <span style={{ color: 'var(--primary)', flexShrink: 0 }}>•</span> {tip}
+                <div key={i} style={{ fontSize: 13, color: '#000', fontWeight: 800, display: 'flex', gap: 10, alignItems: 'flex-start', padding: '8px 10px', background: '#fff', border: '2.5px solid #000', borderRadius: '10px' }}>
+                  <span style={{ color: 'var(--game-purple)', flexShrink: 0, fontWeight: 900 }}>•</span> {tip}
                 </div>
               ))}
             </div>

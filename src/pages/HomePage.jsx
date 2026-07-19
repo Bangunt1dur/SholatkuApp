@@ -1,4 +1,4 @@
-// src/pages/HomePage.jsx
+import React from 'react';
 import { useApp } from '../context/AppContext';
 import { SHOLAT_MOVEMENTS } from '../data/sholatData';
 import MascotRafi from '../components/Shared/MascotRafi';
@@ -9,81 +9,232 @@ export default function HomePage({ setActivePage }) {
   const totalMovements = SHOLAT_MOVEMENTS?.length || 11;
   const xpPercent = Math.min(100, Math.round((profile.xp / profile.xpToNext) * 100));
 
+  // Gaya Dasar Kartu Neo-Brutalisme (Warna Awal)
+  const neobrutalistCardBase = {
+    border: '4px solid #000',
+    boxShadow: '5px 5px 0px #000',
+    borderRadius: '24px',
+    padding: '24px',
+    position: 'relative',
+    boxSizing: 'border-box',
+    color: '#000'
+  };
+
+  // Gaya untuk kartu navigasi interaktif (bisa diklik)
+  const interactiveCardStyle = {
+    ...neobrutalistCardBase,
+    backgroundColor: '#FFFFFF',
+    cursor: 'pointer',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+  };
+
   return (
-    <div style={{ padding: '32px 16px', maxWidth: '1000px', margin: '0 auto' }}>
-      
-      {/* ATAS: AREA HERO HEROAN & ROBOT RAFI */}
-      <section style={{ display: 'flex', gap: '24px', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap' }}>
-        <div className="mancot-float" style={{ width: '120px', height: '120px', fontSize: '70px', textShadow: '4px 4px 0px #000', textAlign: 'center' }}>
+    <div className="animate-fadeInUp" style={{ maxWidth: '1000px', margin: '0 auto', paddingBottom: '40px', color: '#000' }}>
+
+      {/* ─── ATAS: GREETING & MASCOT BANNER ─── */}
+      <section style={{ 
+        ...neobrutalistCardBase, 
+        backgroundColor: '#FFFFFF', 
+        display: 'flex', 
+        gap: '24px', 
+        alignItems: 'center', 
+        marginBottom: '32px', 
+        flexWrap: 'wrap',
+        boxShadow: '6px 6px 0px #000'
+      }}>
+        <div className="mancot-float" style={{ 
+          fontSize: '64px', 
+          backgroundColor: '#FFFFFF', 
+          border: '4px solid #000', 
+          borderRadius: '20px', 
+          padding: '10px', 
+          boxShadow: '3px 3px 0px #000',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
           🤖
         </div>
-        <div style={{ flex: 1, minWidth: '280px' }}>
-          <h1 style={{ fontFamily: 'var(--font-headline)', fontSize: '36px', fontWeight: 900, margin: '0 0 4px' }}>
-            Let The <span style={{ color: 'var(--game-purple)', backgroundColor: '#fff', border: '3px solid #000', padding: '0 8px', borderRadius: '8px' }}>Pahala</span> Begin!
+        <div style={{ flex: 1, minWidth: '260px' }}>
+          <h1 style={{ fontSize: '32px', fontWeight: 900, margin: '0 0 8px', letterSpacing: '-0.5px', lineHeight: 1.2 }}>
+            Assalamualaikum, <span style={{ 
+              backgroundColor: '#FFFFFF', 
+              border: '3.5px solid #000', 
+              padding: '2px 14px', 
+              borderRadius: '14px', 
+              boxShadow: '3px 3px 0px #000',
+              color: 'var(--game-purple)'
+            }}>{profile.name || 'Ahmad'}!</span> 👋
           </h1>
-          <p style={{ fontFamily: 'var(--font-body)', fontWeight: 700, opacity: 0.8, margin: 0 }}>
-            Ready for your daily adventure, Champion? Keep up your streak and collect more gems today!
+          <p style={{ fontSize: '15px', fontWeight: 800, color: '#555', margin: 0, lineHeight: 1.5 }}>
+            Siap untuk petualangan hari ini? Jaga konsistensi sholatmu dan kumpulkan lebih banyak koin!
           </p>
         </div>
       </section>
 
-      {/* TENGAH: BENTO GRID STATS (LEVEL, XP, STREAK) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-        
-        {/* Card Level (Ungu) */}
-        <div className="clay-card purple" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '160px' }}>
-          <div>
-            <span style={{ fontSize: '12px', fontWeight: 800, opacity: 0.9 }}>CURRENT LEVEL</span>
-            <h2 style={{ fontSize: '28px', fontWeight: 900, margin: '4px 0 0' }}>Level {profile.level}</h2>
-          </div>
-          <button className="clay-btn" style={{ alignSelf: 'flex-start', fontSize: '13px', padding: '6px 12px' }} onClick={() => setActivePage('profile')}>
-            View Badges
-          </button>
+      {/* ─── TENGAH: BENTO GRID STATS ─── */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+        gap: '20px', 
+        marginBottom: '32px' 
+      }}>
+
+        {/* Card 1: Status Sholat */}
+        <div style={{ ...neobrutalistCardBase, backgroundColor: '#3b82f6', color: '#FFFFFF' }}>
+          <span style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', color: '#dbeafe' }}>SHOLAT</span>
+          <h2 style={{ fontSize: '40px', fontWeight: 900, margin: '6px 0', color: '#FFFFFF', lineHeight: 1 }}>{prayersDoneToday}/5</h2>
+          <span style={{ fontSize: '13px', fontWeight: 800, color: '#FFFFFF' }}>Waktu Terabsen</span>
+          <div style={{ position: 'absolute', top: '20px', right: '20px', fontSize: '28px', opacity: 0.9 }}>🕌</div>
         </div>
 
-        {/* Card XP Tracker */}
-        <div className="clay-card" style={{ gridColumn: 'span 1', minWidth: '280px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <h3 style={{ fontSize: '20px', fontWeight: 900, margin: 0 }}>XP Tracker</h3>
-            <span style={{ backgroundColor: 'var(--game-green-light)', border: '2px solid #000', padding: '4px 12px', borderRadius: '99px', fontSize: '12px', fontWeight: 900 }}>
-              {profile.xp}/{profile.xpToNext} XP
-            </span>
-          </div>
-          {/* Progress bar tebal silinder figma */}
-          <div style={{ height: '32px', backgroundColor: '#eae7e7', borderRadius: '12px', border: '4px solid #000', padding: '2px', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${xpPercent}%`, backgroundColor: 'var(--game-green)', borderRadius: '6px', borderRight: '2px solid #000', transition: 'width 0.3s ease' }} />
-          </div>
-          <p style={{ fontSize: '12px', fontWeight: 700, fontStyle: 'italic', marginTop: '8px', opacity: 0.7 }}>
-            Only {profile.xpToNext - profile.xp} XP left until you reach Level {profile.level + 1}!
-          </p>
+        {/* Card 2: Koin Rewards */}
+        <div style={{ ...neobrutalistCardBase, backgroundColor: 'var(--game-yellow)' }}>
+          <span style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', color: '#78350f' }}>KOIN REWARDS</span>
+          <h2 style={{ fontSize: '40px', fontWeight: 900, margin: '6px 0', lineHeight: 1 }}>{profile.gems * 250}</h2>
+          <span style={{ fontSize: '13px', fontWeight: 800 }}>Koin Terkumpul</span>
+          <div style={{ position: 'absolute', top: '20px', right: '20px', fontSize: '28px' }}>🪙</div>
         </div>
 
-        {/* Card Streak */}
-        <div className="clay-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-          <div style={{ fontSize: '32px', marginBottom: '2px' }}>🔥</div>
-          <h3 style={{ fontSize: '24px', fontWeight: 900, margin: 0 }}>{profile.streak} Days</h3>
-          <p style={{ fontSize: '13px', fontWeight: 700, opacity: 0.8, margin: 0 }}>Amazing Streak!</p>
+        {/* Card 3: Poin XP & Progress Bar */}
+        <div style={{ ...neobrutalistCardBase, backgroundColor: '#FFFFFF' }}>
+          <span style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', color: '#4c1d95' }}>POIN PERTANYAAN</span>
+          <h2 style={{ fontSize: '40px', fontWeight: 900, margin: '6px 0', lineHeight: 1 }}>{profile.xp} <span style={{ fontSize: '14px', fontWeight: 800, color: '#4c1d95' }}>XP</span></h2>
+          <div style={{ fontSize: '13px', fontWeight: 800, color: '#555' }}>Poin XP</div>
+          <div style={{ position: 'absolute', top: '20px', right: '20px', fontSize: '28px' }}>🧠</div>
         </div>
+
+        {/* Card 4: Streak Konsistensi */}
+        <div style={{ ...neobrutalistCardBase, backgroundColor: '#f43f5e', color: '#FFFFFF' }}>
+          <span style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', color: '#ffe4e6' }}>STREAK HARIAN</span>
+          <h2 style={{ fontSize: '40px', fontWeight: 900, margin: '6px 0', lineHeight: 1 }}>{profile.streak} <span style={{ fontSize: '16px', fontWeight: 800 }}>Days</span></h2>
+          <span style={{ fontSize: '13px', fontWeight: 800, color: '#FFFFFF', display: 'block' }}>Sangat Konsisten!</span>
+          <div style={{ position: 'absolute', top: '20px', right: '20px', fontSize: '28px' }}>🔥</div>
+        </div>
+
       </div>
 
-      {/* BAWAH: COMPONENT INTERAKTIF MASCOT TALK */}
-      <div style={{ marginBottom: '32px' }}>
+      {/* ─── ASISTEN MASCOT TALK ─── */}
+      <div style={{ marginBottom: '36px' }}>
         <MascotRafi />
       </div>
 
-      {/* TRACK PERJALANAN SHOLAT (Your Prayer Journey) */}
-      <h2 style={{ fontSize: '22px', fontWeight: 900, marginBottom: '16px' }}>Misi Hari Ini</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
-        <div className="clay-card" style={{ cursor: 'pointer' }} onClick={() => setActivePage('prayer-guide')}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>📖</div>
-          <h4 style={{ fontSize: '18px', fontWeight: 900, margin: '0 0 4px' }}>Belajar Sholat</h4>
-          <p style={{ fontSize: '12px', fontWeight: 700, opacity: 0.6 }}>{completedCount}/{totalMovements} Gerakan dikuasai</p>
+      {/* ─── TRACK PERJALANAN SHOLAT (MENU UTAMA ANAK) ─── */}
+      <h2 style={{ fontSize: '26px', fontWeight: 900, marginBottom: '20px', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        Ayo Mulai Petualangan! 🗺️
+      </h2>
+
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
+        gap: '24px' 
+      }}>
+
+        {/* Pilihan 1: Belajar Gerakan Sholat */}
+        <div
+          style={interactiveCardStyle}
+          onClick={() => setActivePage('prayer-guide')}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translate(-2px, -2px)';
+            e.currentTarget.style.boxShadow = '7px 7px 0px #000';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'none';
+            e.currentTarget.style.boxShadow = '5px 5px 0px #000';
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ fontSize: '40px' }}>📖</div>
+            <span style={{ fontSize: '12px', fontWeight: 900, backgroundColor: 'var(--game-green-light)', padding: '4px 10px', borderRadius: '8px', border: '2px solid #000' }}>
+              Progres: {completedCount}/{totalMovements} Gerakan
+            </span>
+          </div>
+          <h3 style={{ fontSize: '20px', fontWeight: 900, margin: '4px 0 0' }}>Belajar Gerakan Sholat</h3>
+          <p style={{ fontSize: '14px', fontWeight: 700, color: '#555', margin: 0, lineHeight: 1.4 }}>
+            Pelajari setiap gerakan sholat fardhu secara bertahap, lengkap dengan tuntunan audio bacaan yang jelas serta panduan interaktif.
+          </p>
+          <span style={{ fontSize: '13px', fontWeight: 900, color: 'var(--game-purple)', marginTop: 'auto', paddingTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            Buka Panduan Sholat ➔
+          </span>
         </div>
-        <div className="clay-card" style={{ cursor: 'pointer' }} onClick={() => setActivePage('tracker')}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>✅</div>
-          <h4 style={{ fontSize: '18px', fontWeight: 900, margin: '0 0 4px' }}>Cek Sholatku</h4>
-          <p style={{ fontSize: '12px', fontWeight: 700, opacity: 0.6 }}>{prayersDoneToday}/5 Waktu sholat terabsen</p>
+
+        {/* Pilihan 2: Peta Petualangan */}
+        <div
+          style={interactiveCardStyle}
+          onClick={() => setActivePage('adventure')}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translate(-2px, -2px)';
+            e.currentTarget.style.boxShadow = '7px 7px 0px #000';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'none';
+            e.currentTarget.style.boxShadow = '5px 5px 0px #000';
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ fontSize: '40px' }}>🗺️</div>
+            <span style={{ fontSize: '12px', fontWeight: 900, backgroundColor: 'var(--game-yellow)', color: '#000', padding: '4px 10px', borderRadius: '8px', border: '2px solid #000' }}>
+              Level Misi: {profile.level}/5
+            </span>
+          </div>
+          <h3 style={{ fontSize: '20px', fontWeight: 900, margin: '4px 0 0' }}>Peta Petualangan Sholat</h3>
+          <p style={{ fontSize: '14px', fontWeight: 700, color: '#555', margin: 0, lineHeight: 1.4 }}>
+            Lalui peta petualangan dari berdiri tegak hingga gerakan salam. Selesaikan setiap pos tantangan untuk membuka Peti Harta Karun!
+          </p>
+          <span style={{ fontSize: '13px', fontWeight: 900, color: 'var(--game-purple)', marginTop: 'auto', paddingTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            Lihat Peta Petualangan ➔
+          </span>
         </div>
+
+        {/* Pilihan 3: Kuis Seru */}
+        <div
+          style={interactiveCardStyle}
+          onClick={() => setActivePage('quiz')}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translate(-2px, -2px)';
+            e.currentTarget.style.boxShadow = '7px 7px 0px #000';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'none';
+            e.currentTarget.style.boxShadow = '5px 5px 0px #000';
+          }}
+        >
+          <div style={{ fontSize: '40px' }}>🎯</div>
+          <h3 style={{ fontSize: '20px', fontWeight: 900, margin: '4px 0 0' }}>Kuis Sholatku</h3>
+          <p style={{ fontSize: '14px', fontWeight: 700, color: '#555', margin: 0, lineHeight: 1.4 }}>
+            Uji pemahaman cerdasmu mengenai bacaan, tata cara, dan urutan rukun sholat. Dapatkan tambahan koin emas serta bonus skor XP!
+          </p>
+          <span style={{ fontSize: '13px', fontWeight: 900, color: 'var(--game-purple)', marginTop: 'auto', paddingTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            Main Kuis Sekarang ➔
+          </span>
+        </div>
+
+        {/* Pilihan 4: Jurnal Sholat Harian */}
+        <div
+          style={interactiveCardStyle}
+          onClick={() => setActivePage('tracker')}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translate(-2px, -2px)';
+            e.currentTarget.style.boxShadow = '7px 7px 0px #000';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'none';
+            e.currentTarget.style.boxShadow = '5px 5px 0px #000';
+          }}
+        >
+          <div style={{ fontSize: '40px' }}>✅</div>
+          <h3 style={{ fontSize: '20px', fontWeight: 900, margin: '4px 0 0' }}>Jurnal Sholat Harian</h3>
+          <p style={{ fontSize: '14px', fontWeight: 700, color: '#555', margin: 0, lineHeight: 1.4 }}>
+            Catat absensi ibadah sholat 5 waktumu secara mandiri setiap hari, kumpulkan reward poin, dan pertahankan api *streak*-mu agar tidak padam!
+          </p>
+          <span style={{ fontSize: '13px', fontWeight: 900, color: 'var(--game-purple)', marginTop: 'auto', paddingTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            Buka Jurnal Sholat ➔
+          </span>
+        </div>
+
       </div>
 
     </div>

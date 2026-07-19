@@ -46,12 +46,11 @@ export default function PrayerGuide() {
         {isKidsMode ? 'Belajar Gerakan Sholat 🌟' : 'Panduan Gerakan Sholat'}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '24px', alignItems: 'start' }}>
         {/* Movement List Sidebar */}
-        {/* Ubah .card menjadi .clay-card agar empuk */}
-        <div className="clay-card" style={{ position: 'sticky', top: 20, alignSelf: 'flex-start', maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
-          <div style={{ fontWeight: 900, fontSize: 13, color: 'var(--text-dark)', marginBottom: 10 }}>
-            📋 Daftar Gerakan
+        <div className="card" style={{ position: 'sticky', top: '20px', alignSelf: 'flex-start', maxHeight: 'calc(100vh - 120px)', overflowY: 'auto', padding: '20px 16px' }}>
+          <div style={{ fontWeight: 900, fontSize: '14px', color: 'var(--text-dark)', marginBottom: '12px', borderBottom: '3px solid #000', paddingBottom: '8px' }}>
+            📋 DAFTAR GERAKAN
           </div>
           <div className="movement-list">
             {SHOLAT_MOVEMENTS.map((m, i) => {
@@ -66,7 +65,7 @@ export default function PrayerGuide() {
                     {done ? '✓' : i + 1}
                   </div>
                   <div>
-                    <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--text-dark)', lineHeight: 1.3 }}>
+                    <div style={{ fontSize: '13px', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1.3 }}>
                       {isKidsMode ? m.nameKids : m.name}
                     </div>
                   </div>
@@ -76,12 +75,33 @@ export default function PrayerGuide() {
           </div>
 
           {/* Autoplay Toggle */}
-          <div style={{ marginTop: 14, padding: '10px 0', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
-            <div className="autoplay-toggle" onClick={() => setAutoplay(a => !a)}>
-              <div className={`toggle-track ${autoplay ? 'on' : ''}`}>
-                <div className="toggle-thumb" />
+          <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '3px dashed #000' }}>
+            <div className="autoplay-toggle" onClick={() => setAutoplay(a => !a)} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+              <div 
+                style={{ 
+                  width: '44px', 
+                  height: '24px', 
+                  borderRadius: '12px', 
+                  backgroundColor: autoplay ? 'var(--game-green-light)' : '#e2e8f0', 
+                  border: '3px solid #000',
+                  position: 'relative',
+                  transition: 'background var(--transition)'
+                }}
+              >
+                <div 
+                  style={{ 
+                    position: 'absolute', 
+                    top: '2px', 
+                    left: autoplay ? '20px' : '2px', 
+                    width: '14px', 
+                    height: '14px', 
+                    borderRadius: '50%', 
+                    backgroundColor: '#000', 
+                    transition: 'left 0.1s ease' 
+                  }} 
+                />
               </div>
-              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--mint-dark)' }}>
+              <span style={{ fontSize: '12px', fontWeight: 900, color: '#000' }}>
                 {autoplay ? '🔄 Autoplay ON' : '⏸ Autoplay OFF'}
               </span>
             </div>
@@ -89,103 +109,108 @@ export default function PrayerGuide() {
         </div>
 
         {/* Main Content */}
-        <div>
-          <div className="prayer-movement-card mb-4" key={movement.id}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div className="card" key={movement.id} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             
-            {/* 👇👇 BAGIAN GAMBAR DIMULAI DARI SINI 👇👇 */}
-            <div className="movement-image clay-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '30px', position: 'relative', marginBottom: '16px' }}>
+            {/* BAGIAN GAMBAR */}
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              padding: '30px', 
+              position: 'relative', 
+              backgroundColor: 'var(--primary-light)',
+              borderRadius: '16px',
+              border: '3px solid #000',
+              boxShadow: 'inset 0 0 20px rgba(0,0,0,0.05)'
+            }}>
               <img 
                 src={movement.image} 
                 alt={movement.name} 
-                style={{ width: '160px', height: '160px', objectFit: 'contain', animation: 'float 3s ease-in-out infinite' }} 
+                style={{ width: '180px', height: '180px', objectFit: 'contain', animation: 'floatAnimation 3s ease-in-out infinite' }} 
               />
-              <div style={{ position: 'absolute', top: 12, left: 12, background: 'var(--mint-dark)', color: 'white', width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 13 }}>
+              <div style={{ position: 'absolute', top: 12, left: 12, backgroundColor: 'var(--game-yellow)', color: '#000', border: '3px solid #000', width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14 }}>
                 {currentIdx + 1}
               </div>
             </div>
-            {/* 👆👆 BAGIAN GAMBAR BERAKHIR DI SINI 👆👆 */}
 
-            {/* Content */}
-            <div className="movement-content">
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
-                <div>
-                  <div className="movement-name" style={{ fontSize: '24px', fontWeight: '900', color: 'var(--mint-dark)' }}>
-                    {isKidsMode ? movement.nameKids : movement.name}
-                  </div>
-                </div>
+            {/* Content Details */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <h2 style={{ fontSize: '28px', fontWeight: 900, color: 'var(--game-dark)', margin: 0 }}>
+                  {isKidsMode ? movement.nameKids : movement.name}
+                </h2>
                 {isCompleted ? (
-                  <span className="badge" style={{ background: '#E0F5EE', color: '#3BA37B', padding: '6px 12px', borderRadius: '12px', fontWeight: '800' }}>✓ Selesai</span>
+                  <span style={{ background: 'var(--game-green-light)', color: '#000', border: '3px solid #000', padding: '6px 16px', borderRadius: '12px', fontWeight: '900', fontSize: '13px', boxShadow: '2px 2px 0px #000' }}>✓ Selesai</span>
                 ) : (
-                  <span className="badge" style={{ background: '#FFD166', color: '#CC9900', padding: '6px 12px', borderRadius: '12px', fontWeight: '800' }}>Belum</span>
+                  <span style={{ background: '#fecdd3', color: '#be123c', border: '3px solid #000', padding: '6px 16px', borderRadius: '12px', fontWeight: '900', fontSize: '13px' }}>Belum</span>
                 )}
               </div>
 
               {/* Arabic Text */}
               {movement.arabicText && (
-                <div style={{ background: 'rgba(126, 224, 185, 0.2)', borderRadius: 'var(--radius-clay)', padding: '16px 20px', marginBottom: 14, borderLeft: '4px solid var(--mint-base)' }}>
-                  <div className="arabic-text" style={{ fontSize: '22px', textAlign: 'right' }}>{movement.arabicText}</div>
+                <div style={{ background: '#f8fafc', borderRadius: '16px', padding: '20px', border: '3px solid #000', boxShadow: '4px 4px 0px #000' }}>
+                  <div className="arabic-text" style={{ fontSize: '26px', textAlign: 'right', fontWeight: 900, lineHeight: 1.6 }}>{movement.arabicText}</div>
                 </div>
               )}
 
               {/* Latin & Translation */}
               {movement.latin && (
-                <div style={{ marginBottom: 10 }}>
-                  <div style={{ fontSize: 10.5, fontWeight: 800, color: 'var(--mint-dark)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 3 }}>Latin</div>
-                  <div className="latin-text" style={{ fontStyle: 'italic', fontWeight: '600' }}>{movement.latin}</div>
+                <div style={{ borderLeft: '4px solid var(--game-purple)', paddingLeft: '12px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 900, color: 'var(--game-purple)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>Latin</div>
+                  <div className="latin-text" style={{ fontStyle: 'italic', fontWeight: '700', fontSize: '15px', color: '#333' }}>{movement.latin}</div>
                 </div>
               )}
               {movement.translation && (
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 10.5, fontWeight: 800, color: 'var(--mint-dark)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 3 }}>Terjemahan</div>
-                  <div className="translation-text" style={{ fontWeight: '600' }}>{movement.translation}</div>
+                <div style={{ borderLeft: '4px solid var(--game-green)', paddingLeft: '12px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 900, color: 'var(--game-green)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>Terjemahan</div>
+                  <div className="translation-text" style={{ fontWeight: '700', fontSize: '14px', color: '#444' }}>{movement.translation}</div>
                 </div>
               )}
 
               {/* Explanation */}
-              <div style={{ background: isKidsMode ? '#FFD16620' : 'rgba(126, 224, 185, 0.2)', borderRadius: 'var(--radius-clay)', padding: '16px', marginBottom: 14 }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: isKidsMode ? '#CC9900' : 'var(--mint-dark)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                  {isKidsMode ? '💡 Penjelasan untuk Kamu' : 'ℹ️ Penjelasan'}
+              <div style={{ background: isKidsMode ? '#fef3c7' : '#f1f5f9', borderRadius: '16px', border: '3px solid #000', padding: '16px' }}>
+                <div style={{ fontSize: '11px', fontWeight: 900, color: isKidsMode ? '#b45309' : '#475569', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  {isKidsMode ? '💡 Penjelasan untuk Kamu' : 'ℹ️ Keterangan'}
                 </div>
-                <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.7, fontWeight: '600' }}>
+                <div style={{ fontSize: '13px', color: '#000', lineHeight: 1.7, fontWeight: '700' }}>
                   {isKidsMode ? movement.explanationKids : movement.explanation}
                 </div>
               </div>
 
               {/* Audio Player */}
               {movement.audioUrl && (
-                <div style={{ marginBottom: 14 }}>
+                <div style={{ marginTop: '8px' }}>
                   <AudioPlayer
                     src={movement.audioUrl}
-                    label={`Bacaan — ${isKidsMode ? movement.nameKids : movement.name}`}
+                    label={`Pelafalan Bacaan Sholat`}
                     onEnded={handleAudioEnded}
                     autoPlay={autoplay}
                   />
                 </div>
               )}
 
-              {/* Mark Complete Button (SUDAH DIPERBAIKI) */}
+              {/* Mark Complete Button */}
               <button 
-                className={`clay-btn w-full ${isCompleted ? '' : 'yellow'}`} 
+                className={`btn w-full ${isCompleted ? 'btn-ghost' : 'btn-primary'}`} 
                 onClick={handleMarkComplete} 
                 disabled={isCompleted}
-                style={{ opacity: isCompleted ? 0.6 : 1 }}
+                style={{ fontSize: '16px', padding: '14px', marginTop: '10px' }}
               >
                 {justCompleted ? (
-                  <><CheckCircle size={18} /> Tandai Selesai! ⭐</>
+                  <><CheckCircle size={18} /> Level Diselesaikan! +50 XP ⭐</>
                 ) : isCompleted ? (
-                  <><CheckCircle size={18} /> Sudah Dipelajari ✓</>
+                  <><CheckCircle size={18} /> Gerakan Sudah Dikuasai ✓</>
                 ) : (
-                  <>📌 Tandai Sudah Belajar</>
+                  <>🎯 Selesaikan Gerakan Ini (+50 XP) 🎁</>
                 )}
               </button>
             </div>
           </div>
 
           {/* Navigation Controls */}
-          <div className="nav-controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
-            
-            {/* Tombol Sebelumnya (SUDAH DIPERBAIKI) */}
-            <button className="clay-btn" onClick={goPrev} disabled={currentIdx === 0} style={{ padding: '10px 16px' }}>
+          <div className="nav-controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
+            <button className="btn" onClick={goPrev} disabled={currentIdx === 0} style={{ padding: '10px 20px' }}>
               <ChevronLeft size={18} /> {isKidsMode ? 'Kembali' : 'Sebelumnya'}
             </button>
 
@@ -198,54 +223,53 @@ export default function PrayerGuide() {
                   style={{ 
                     cursor: 'pointer', 
                     width: '12px', height: '12px', borderRadius: '50%',
-                    backgroundColor: i === currentIdx ? 'var(--mint-dark)' : profile.completedMovements.includes(m.key) ? 'var(--mint-base)' : '#ccc'
+                    border: '2px solid #000',
+                    backgroundColor: i === currentIdx ? 'var(--game-purple)' : profile.completedMovements.includes(m.key) ? 'var(--game-green-light)' : '#fff',
+                    transition: 'all 0.1s ease'
                   }}
                 />
               ))}
             </div>
 
-            {/* Tombol Selanjutnya (SUDAH DIPERBAIKI) */}
-            <button className="clay-btn yellow" onClick={goNext} disabled={currentIdx === totalCount - 1} style={{ padding: '10px 16px' }}>
+            <button className="btn" onClick={goNext} disabled={currentIdx === totalCount - 1} style={{ padding: '10px 20px', backgroundColor: 'var(--game-yellow)' }}>
               {isKidsMode ? 'Lanjut' : 'Selanjutnya'} <ChevronRight size={18} />
             </button>
           </div>
 
           {/* Video Section */}
-          <div className="clay-card" style={{ marginTop: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <div className="section-title" style={{ margin: 0 }}>
-                <div className="title-icon">🎬</div>
-                <span style={{ fontWeight: 900, color: 'var(--mint-dark)' }}>
-                  {isKidsMode ? 'Video Sholat' : 'Video Tata Cara Sholat'}
+          <div className="card" style={{ marginTop: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '24px' }}>🎬</span>
+                <span style={{ fontWeight: 900, fontSize: '16px' }}>
+                  {isKidsMode ? 'Video Belajar Sholat' : 'Video Tutorial Sholat'}
                 </span>
               </div>
-              
-              {/* Tombol Tonton Video (SUDAH DIPERBAIKI) */}
-              <button className="clay-btn" style={{ padding: '8px 16px', fontSize: '14px' }} onClick={() => setShowVideo(v => !v)}>
-                {showVideo ? 'Tutup Video' : 'Tonton Video'}
+              <button className="btn btn-sm" style={{ backgroundColor: '#fff' }} onClick={() => setShowVideo(v => !v)}>
+                {showVideo ? 'Tutup Video ❌' : 'Buka Video Tutorial 🎬'}
               </button>
             </div>
             
             {showVideo && (
-              <div className="video-container animate-fadeIn" style={{ borderRadius: 'var(--radius-clay)', overflow: 'hidden' }}>
+              <div className="video-container animate-fadeInUp" style={{ borderRadius: '16px', overflow: 'hidden', border: '3px solid #000', boxShadow: '4px 4px 0px #000' }}>
                 <iframe
                   src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?rel=0&modestbranding=1`}
                   title="Video Tata Cara Sholat"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  style={{ width: '100%', height: '300px', border: 'none' }}
+                  style={{ width: '100%', height: '320px', border: 'none' }}
                 />
               </div>
             )}
             
             {!showVideo && (
               <div
-                style={{ background: 'rgba(126, 224, 185, 0.2)', borderRadius: 'var(--radius-clay)', height: 140, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', border: '3px dashed var(--mint-base)' }}
+                style={{ background: '#f8fafc', borderRadius: '16px', height: '140px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', border: '3px dashed #000' }}
                 onClick={() => setShowVideo(true)}
               >
-                <div style={{ fontSize: 40 }}>▶️</div>
-                <div style={{ fontWeight: 800, color: 'var(--mint-dark)', fontSize: 14 }}>
-                  {isKidsMode ? 'Klik untuk Tonton Video Sholat!' : 'Tonton Video Tata Cara Sholat'}
+                <div style={{ fontSize: '40px' }}>▶️</div>
+                <div style={{ fontWeight: 900, fontSize: '14px' }}>
+                  {isKidsMode ? 'Klik untuk Tonton Video Sholat! 📺' : 'Tonton Video Panduan Tata Cara Sholat'}
                 </div>
               </div>
             )}
