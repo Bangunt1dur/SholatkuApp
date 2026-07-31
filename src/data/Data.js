@@ -1,14 +1,5 @@
-// src/data/data.js
-
-// ==========================================
-// 1. IMPORT ASET SVG GERAKAN SHOLAT
-// ==========================================
-import ImgTakbiratulIhram from '../assets/takbiratul ihram.svg';
-import ImgRukuk from '../assets/Rukuk.svg';
-import ImgSujud from '../assets/sujud.svg';
-import ImgDudukDiantaraSujud from '../assets/duduk diantara dua sujud.svg';
-import ImgSalamKanan from '../assets/salam pertama(kanan).svg';
-import ImgSalamKiri from '../assets/salam kedua(kiri).svg';
+// src/data/Data.js
+import { MOVEMENT_IMAGES } from './movementImages';
 
 export const SHOLAT_MOVEMENTS = [
   {
@@ -16,160 +7,157 @@ export const SHOLAT_MOVEMENTS = [
     key: 'qiyam',
     name: 'Berdiri Tegak (Qiyam)',
     nameKids: 'Berdiri Tegak',
-    image: ImgTakbiratulIhram, // Sementara pakai gambar ini jika Qiyam belum ada
+    image: MOVEMENT_IMAGES['takbiratul ihram'] || MOVEMENT_IMAGES['takbiratul_ihram'],
     arabicText: '',
     latin: 'Menghadap kiblat dan berniat di dalam hati.',
     translation: '',
     explanation: 'Berdiri tegak lurus menghadap kiblat. Niat sholat dilakukan di dalam hati ikhlas karena Allah Ta\'ala tanpa perlu dilafalkan (diucapkan dengan lisan).',
     explanationKids: 'Berdiri tegak menghadap kiblat. Siapkan hatimu untuk sholat karena Allah ya!',
     audioUrl: '',
-    source: 'HPT Muhammadiyah (Kitab Shalat)'
+    source: 'HPT Muhammadiyah (RS PKU Muhammadiyah Cepu)'
   },
   {
     id: 2,
     key: 'takbiratul_ihram',
     name: 'Takbiratul Ihram',
     nameKids: 'Takbir',
-    image: ImgTakbiratulIhram,
-    arabicText: 'اللَّهُ أَكْبَرُ',
+    image: MOVEMENT_IMAGES['takbiratul ihram'] || MOVEMENT_IMAGES['takbiratul_ihram'],
+    arabicText: 'اللَّهُ أَكْبَرُ',
     latin: 'Allāhu Akbar',
     translation: 'Allah Maha Besar.',
     explanation: 'Mengangkat kedua tangan sejajar telinga atau bahu sambil mengucapkan takbir.',
     explanationKids: 'Angkat kedua tanganmu dan ucapkan "Allahu Akbar" dengan semangat!',
     audioUrl: '',
-    source: 'HPT Muhammadiyah (Kitab Shalat)'
+    source: 'HPT Muhammadiyah (RS PKU Muhammadiyah Cepu)'
   },
   {
     id: 3,
     key: 'bersedekap_iftitah',
     name: 'Bersedekap & Doa Iftitah',
     nameKids: 'Bersedekap',
-    image: ImgTakbiratulIhram,
-    arabicText: 'اللَّهُمَّ بَاعِدْ بَيْنِي وَبَيْنَ خَطَايَايَ كَمَا بَاعَدْتَ بَيْنَ الْمَشْرِقِ وَالْمَغْرِبِ...',
-    latin: 'Allāhumma bā\'id bainī wa baina khaṭāyāya kamā bā\'adta bainal-masyriqi wal-magrib...',
-    translation: 'Ya Allah, jauhkanlah antara diriku dan kesalahan-kesalahanku sebagaimana Engkau jauhkan antara timur dan barat...',
+    image: MOVEMENT_IMAGES['takbiratul ihram'] || MOVEMENT_IMAGES['takbiratul_ihram'],
+    arabicText: 'اللَّهُمَّ بَاعِدْ بَيْنِي وَبَيْنَ خَطَايَايَ كَمَا بَاعَدْتَ بَيْنَ الْمَشْرِقِ وَالْمَغْرِبِ ، اللَّهُمَّ نَقِّنِي مِنَ الْخَطَايَا كَمَا يُنَقَّى الثَّوْبُ الأَبْيَضُ مِنَ الدَّنَسِ ، اللَّهُمَّ اغْسِلْ خَطَايَايَ بِالْمَاءِ وَالثَّلْجِ وَالْبَرَدِ',
+    latin: 'Allaahumma baa\'id bainii wabainaa khotoo yaa ya kamaa baa \'adta bainal masyriqi wal maghrib. Allaahumma naqqinii minal khotoo yaa kamaa yunqqots tsaubul abyadhuu minaddanas. Allaahummaghsil khotoo yaa ya bil maa i wats tsalji walbarod.',
+    translation: 'Ya Allah, jauhkanlah antara diriku dan kesalahan-kesalahanku sebagaimana Engkau jauhkan antara timur dan barat. Ya Allah, bersihkanlah aku dari kesalahan-kesalahan sebagaimana dibersihkannya kain putih dari kotoran. Ya Allah, cucilah kesalahan-kesalahanku dengan air, salju, dan es.',
     explanation: 'Meletakkan telapak tangan kanan di atas punggung tangan kiri, pergelangan, atau lengan kiri, diletakkan di dada. Kemudian membaca doa Iftitah.',
     explanationKids: 'Letakkan tangan kanan di atas tangan kirimu di dada, lalu baca doa pembuka sholat (Iftitah).',
     audioUrl: '',
-    source: 'HPT Muhammadiyah (Kitab Shalat)'
+    source: 'HPT Muhammadiyah (RS PKU Muhammadiyah Cepu)'
   },
   {
     id: 4,
     key: 'al_fatihah',
     name: 'Membaca Al-Fatihah',
     nameKids: 'Surah Al-Fatihah',
-    image: ImgTakbiratulIhram,
+    image: MOVEMENT_IMAGES['takbiratul ihram'] || MOVEMENT_IMAGES['takbiratul_ihram'],
     arabicText: 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ... (إلى آخر السورة)',
     latin: 'Bismillāhir-raḥmānir-raḥīm... (sampai akhir surah)',
     translation: 'Dengan menyebut nama Allah Yang Maha Pengasih lagi Maha Penyayang... (dst)',
     explanation: 'Membaca Ta\'awudz pelan, lalu membaca surah Al-Fatihah yang merupakan rukun sholat. Setelah itu disunnahkan membaca surah/ayat Al-Qur\'an lain.',
     explanationKids: 'Baca surah Al-Fatihah dengan tartil. Ini wajib lho di setiap rakaat!',
     audioUrl: '',
-    source: 'HPT Muhammadiyah (Kitab Shalat)'
+    source: 'HPT Muhammadiyah (RS PKU Muhammadiyah Cepu)'
   },
   {
     id: 5,
     key: 'rukuk',
     name: 'Rukuk',
     nameKids: 'Rukuk',
-    image: ImgRukuk,
-    arabicText: 'سُبْحَانَكَ اللَّهُمَّ رَبَّنَا وَبِحَمْدِكَ اللَّهُمَّ اغْفِرْ لِي',
-    latin: 'Subhānakallāhumma rabbanā wa biḥamdikallāhummagfir lī',
+    image: MOVEMENT_IMAGES['Rukuk'] || MOVEMENT_IMAGES['rukuk'],
+    arabicText: 'سُبْحَانَكَ اللَّهُمَّ رَبَّنَا وَبِحَمْدِكَ اللَّهُمَّ اغْفِرْ لِي',
+    latin: 'Subhaanaka allaahuma robbanaa wabihamdika allaahumaghfirlii.',
     translation: 'Maha Suci Engkau ya Allah, Tuhan kami, dan dengan memuji-Mu ya Allah, ampunilah aku.',
     explanation: 'Membungkukkan badan dengan punggung rata, tangan memegang lutut dengan thuma\'ninah (tenang).',
     explanationKids: 'Bungkukkan badanmu, punggung lurus seperti meja, pegang lutut, lalu baca doanya pelan-pelan.',
     audioUrl: '',
-    source: 'HPT Muhammadiyah (Kitab Shalat)'
+    source: 'HPT Muhammadiyah (RS PKU Muhammadiyah Cepu)'
   },
   {
     id: 6,
     key: 'itidal',
     name: 'I\'tidal',
     nameKids: 'I\'tidal',
-    image: ImgTakbiratulIhram, // Sesuaikan jika ada gambar itidal
-    arabicText: 'سَمِعَ اللَّهُ لِمَنْ حَمِدَهُ ، رَبَّنَا وَلَكَ الْحَمْدُ',
-    latin: 'Sami\'allāhu liman ḥamidah. Rabbanā wa lakal-ḥamd.',
-    translation: 'Allah maha mendengar orang yang memuji-Nya. Ya Tuhan kami, bagi-Mu segala puji.',
+    image: MOVEMENT_IMAGES['takbiratul ihram'] || MOVEMENT_IMAGES['takbiratul_ihram'],
+    arabicText: 'سَمِعَ اللَّهُ لِمَنْ حَمِدَهُ ، رَبَّنَا وَلَكَ الْحَمْدُ حَمْدًا كَثِيرًا طَيِّبًا مُبَارَكًا فِيهِ',
+    latin: 'Sami\'allaahu liman hamidah. Robbanaa walakalhamdu hamdan katsiiran thayyiban mubaarokan fiihi.',
+    translation: 'Allah maha mendengar orang yang memuji-Nya. Ya Tuhan kami, bagi-Mu segala puji, pujian yang banyak, baik, dan diberkahi di dalamnya.',
     explanation: 'Bangkit dari rukuk hingga berdiri tegak lurus (thuma\'ninah). Mengangkat tangan saat membaca "Sami\'allahu...", lalu melepas tangan ke bawah.',
     explanationKids: 'Berdiri tegak lagi setelah rukuk. Angkat tanganmu sebentar lalu lepaskan ke bawah.',
     audioUrl: '',
-    source: 'HPT Muhammadiyah (Kitab Shalat)'
+    source: 'HPT Muhammadiyah (RS PKU Muhammadiyah Cepu)'
   },
   {
     id: 7,
     key: 'sujud',
     name: 'Sujud',
     nameKids: 'Sujud',
-    image: ImgSujud,
-    arabicText: 'سُبْحَانَكَ اللَّهُمَّ رَبَّنَا وَبِحَمْدِكَ اللَّهُمَّ اغْفِرْ لِي',
-    latin: 'Subhānakallāhumma rabbanā wa biḥamdikallāhummagfir lī',
+    image: MOVEMENT_IMAGES['sujud'],
+    arabicText: 'سُبْحَانَكَ اللَّهُمَّ رَبَّنَا وَبِحَمْدِكَ اللَّهُمَّ اغْفِرْ لِي',
+    latin: 'Subhaanaka allaahuma robbanaa wabihamdika allaahumaghfirlii.',
     translation: 'Maha Suci Engkau ya Allah, Tuhan kami, dan dengan memuji-Mu ya Allah, ampunilah aku.',
     explanation: 'Turun sujud bertumpu pada 7 anggota badan: dahi (termasuk hidung), kedua telapak tangan, kedua lutut, dan ujung jari kedua kaki.',
     explanationKids: 'Sujud menempelkan dahi, hidung, tangan, lutut, dan ujung kaki ke lantai. Posisi paling dekat dengan Allah!',
     audioUrl: '',
-    source: 'HPT Muhammadiyah (Kitab Shalat)'
+    source: 'HPT Muhammadiyah (RS PKU Muhammadiyah Cepu)'
   },
   {
     id: 8,
     key: 'duduk_antara_sujud',
     name: 'Duduk Antara Dua Sujud',
     nameKids: 'Duduk',
-    image: ImgDudukDiantaraSujud,
-    arabicText: 'اللَّهُمَّ اغْفِرْ لِي، وَارْحَمْنِي، وَاجْبُرْنِي، وَاهْدِنِي، وَارْزُقْنِي',
-    latin: 'Allāhummagfir lī, warḥamnī, wajburnī, wahdinī, warzuqnī',
+    image: MOVEMENT_IMAGES['duduk diantara dua sujud'] || MOVEMENT_IMAGES['duduk_diantara_dua_sujud'],
+    arabicText: 'اللَّهُمَّ اغْفِرْ لِي وَارْحَمْنِي وَاجْبُرْنِي وَاهْدِنِي وَارْزُقْنِي',
+    latin: 'Allaahummaghfirlii warhamnii wajburnii wahdinii warzuqnii.',
     translation: 'Ya Allah, ampunilah aku, rahmatilah aku, cukupkanlah aku, berilah aku petunjuk, dan berilah aku rezeki.',
     explanation: 'Duduk iftirasy (menduduki telapak kaki kiri, telapak kaki kanan ditegakkan). Telapak tangan diletakkan di atas paha/lutut.',
     explanationKids: 'Duduk yang tenang sebentar, letakkan tangan di atas paha, dan minta kebaikan kepada Allah.',
     audioUrl: '',
-    source: 'HPT Muhammadiyah (Kitab Shalat)'
+    source: 'HPT Muhammadiyah (RS PKU Muhammadiyah Cepu)'
   },
   {
     id: 9,
     key: 'tasyahud_awal',
     name: 'Tasyahud Awal',
     nameKids: 'Tasyahud Awal',
-    image: ImgDudukDiantaraSujud, // Menggunakan gambar duduk
-    arabicText: 'التَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ...',
-    latin: 'At-taḥiyyātu lillāhi waṣ-ṣalawātu waṭ-ṭayyibāt... (dst)',
-    translation: 'Segala kehormatan, kebahagiaan, dan kebagusan adalah milik Allah... (dst)',
+    image: MOVEMENT_IMAGES['tahiyyat awal'] || MOVEMENT_IMAGES['tahiyyat_awal'],
+    arabicText: 'التَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ، السَّلاَمُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلاَمُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لاَ إِلَهَ إِلاَّ اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ',
+    latin: 'Attahiyyaatu lillaahi washsholawaatu waththoyyibaat. Assalaamu \'alaika ayyuhannabiyyu warohmatullaahi wabarokaatuh. Assalaamu\'alainaa wa\'ala \'ibaadillaahi shshoolihiin. Asyhadu anlaa ilaaha illallaah waasyhadu annamuhammadan \'abduhu warosuuluh.',
+    translation: 'Segala kehormatan, kebahagiaan, dan kebagusan adalah milik Allah. Semoga keselamatan bagi Engkau, wahai Nabi, beserta rahmat Allah dan berkah-Nya...',
     explanation: 'Duduk iftirasy. Telapak tangan di atas paha. Jari telunjuk tangan kanan diisyaratkan lurus ke depan saat membaca doa.',
     explanationKids: 'Duduk dan acungkan jari telunjuk kananmu pelan-pelan saat membaca doanya.',
     audioUrl: '',
-    source: 'HPT Muhammadiyah (Kitab Shalat)'
+    source: 'HPT Muhammadiyah (RS PKU Muhammadiyah Cepu)'
   },
   {
     id: 10,
     key: 'tasyahud_akhir',
-    name: 'Tasyahud Akhir',
+    name: 'Tasyahud Akhir & Shalawat',
     nameKids: 'Tasyahud Akhir',
-    image: ImgDudukDiantaraSujud,
-    arabicText: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ...',
-    latin: 'Allāhumma ṣalli \'alā Muḥammad wa \'alā āli Muḥammad... (dst)',
-    translation: 'Ya Allah, limpahkanlah kemurahan-Mu kepada Muhammad dan keluarganya... (dst)',
+    image: MOVEMENT_IMAGES['tahiyyat akhir'] || MOVEMENT_IMAGES['tahiyyat_akhir'],
+    arabicText: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَآلِ إِبْرَاهِيمَ وَبَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَآلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ',
+    latin: 'Allaahumma sholli \'alaa Muhammad wa\'alaa aali Muhammad. Kamaa shollaita \'alaa ibroohiim wa aali ibroohiim. Wabaarik \'alaa Muhammad wa aali Muhammad. Kamaa baarokta \'alaa ibroohiim wa aali ibroohiim. Innaka hamiidummajiid.',
+    translation: 'Ya Allah, limpahkanlah kemurahan-Mu kepada Muhammad dan keluarganya, sebagaimana telah Engkau limpahkan kepada Ibrahim...',
     explanation: 'Duduk tawarruk (telapak kaki kiri dimasukkan ke bawah betis kanan, pantat duduk di lantai). Membaca Tasyahud disusul Shalawat Nabi.',
     explanationKids: 'Duduk tawarruk (kaki kirinya dimasukkan). Baca doa memuji Allah dan Nabi Muhammad.',
     audioUrl: '',
-    source: 'HPT Muhammadiyah (Kitab Shalat)'
+    source: 'HPT Muhammadiyah (RS PKU Muhammadiyah Cepu)'
   },
   {
     id: 11,
     key: 'salam',
     name: 'Salam',
     nameKids: 'Salam',
-    image: ImgSalamKanan, // Default kanan
-    arabicText: 'السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ',
-    latin: 'Assalāmu\'alaikum wa raḥmatullāh.',
-    translation: 'Keselamatan dan rahmat Allah semoga dilimpahkan kepadamu.',
-    explanation: 'Menoleh ke kanan hingga terlihat pipi kanan dari belakang membaca salam, kemudian menoleh ke kiri (ImgSalamKiri) dan membaca salam yang sama.',
+    image: MOVEMENT_IMAGES['salam pertama(kanan)'] || MOVEMENT_IMAGES['salam_pertamakanan'],
+    arabicText: 'السَّلاَمُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ',
+    latin: 'Assalāmu \'alaikum wa raḥmatullāhi wa barakātuh.',
+    translation: 'Keselamatan, rahmat Allah, dan berkah-Nya semoga dilimpahkan kepadamu.',
+    explanation: 'Menoleh ke kanan hingga terlihat pipi kanan dari belakang membaca salam, kemudian menoleh ke kiri dan membaca salam yang sama.',
     explanationKids: 'Tengok ke kanan dan ucapkan salam, lalu tengok ke kiri dan ucapkan salam. Selesai deh sholatnya!',
     audioUrl: '',
-    source: 'HPT Muhammadiyah (Kitab Shalat)'
+    source: 'HPT Muhammadiyah (RS PKU Muhammadiyah Cepu)'
   }
 ];
 
-// ==========================================
-// 3. DATA PENDUKUNG (TRACKER & GAMIFIKASI)
-// ==========================================
 export const PRAYER_NAMES = [
   { key: 'fajr', label: 'Subuh', labelKids: 'Subuh', emoji: '🌅' },
   { key: 'dhuhr', label: 'Dzuhur', labelKids: 'Dzuhur', emoji: '☀️' },
@@ -242,11 +230,10 @@ export const QUIZ_QUESTIONS = [
   }
 ];
 
-  export const MASCOT_TIPS = [
+export const MASCOT_TIPS = [
   "Jangan lupa niat sholat karena Allah ya! 🌟",
   "Sholat tepat waktu itu hebat sekali! ✨",
   "Ayo, gerakan selanjutnya adalah ruku yang tenang. 🙇‍♂️",
   "Alhamdulillah, kamu makin pintar belajar sholat! 💎",
   "Ingat, Allah selalu melihat kesungguhanmu. 😊"
-
 ];

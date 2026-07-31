@@ -1,27 +1,58 @@
 import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
+import { SHOLAT_MOVEMENTS } from '../data/Data';
 
-// Data 11 Level Petualangan Sholat sesuai petunjuk di CSS Anda
-const levelsData = [
-  { id: 1, name: "Niat & Takbir", icon: "✋", points: 10, description: "Memulai sholat dengan ikhlas" },
-  { id: 2, name: "Berdiri Tegak", icon: "🧍", points: 15, description: "Posisi berdiri yang sempurna" },
-  { id: 3, name: "Membaca Al-Fatihah", icon: "📖", points: 20, description: "Membaca surah pembuka Al-Qur'an" },
-  { id: 4, name: "Ruku'", icon: "📐", points: 25, description: "Membungkuk dengan tenang (Tuma'ninah)" },
-  { id: 5, name: "I'tidal", icon: "⬆️", points: 25, description: "Bangkit tegak dari ruku'" },
-  { id: 6, name: "Sujud Pertama", icon: "🧎", points: 30, description: "Mendekatkan diri kepada Allah" },
-  { id: 7, name: "Duduk di Antara 2 Sujud", icon: "🧘", points: 30, description: "Duduk tenang dan berdoa" },
-  { id: 8, name: "Sujud Kedua", icon: "🧎", points: 30, description: "Menyempurnakan rakaat sholat" },
-  { id: 9, name: "Tashahhud Awal", icon: "☝️", points: 35, description: "Duduk membaca tasyahud pertama" },
-  { id: 10, name: "Tashahhud Akhir", icon: "🕌", points: 40, description: "Membaca shalawat di akhir sholat" },
-  { id: 11, name: "Salam", icon: "✨", points: 50, description: "Menutup petualangan sholat dengan damai" },
+const movementMetadata = [
+  { icon: "🧍", points: 10, description: "Berdiri tegak menghadap kiblat dengan ikhlas." },
+  { icon: "✋", points: 15, description: "Mengangkat kedua tangan dan mengucapkan Allahu Akbar." },
+  { icon: "🤲", points: 20, description: "Meletakkan tangan di dada dan membaca doa pembuka." },
+  { icon: "📖", points: 20, description: "Membaca surah pembuka wajib Al-Fatihah." },
+  { icon: "📐", points: 25, description: "Membungkuk dengan tenang (tuma'ninah)." },
+  { icon: "⬆️", points: 25, description: "Bangkit berdiri lurus dari rukuk." },
+  { icon: "🧎", points: 30, description: "Sujud khusyuk mendekatkan diri kepada Allah." },
+  { icon: "🧘", points: 30, description: "Duduk tenang membaca doa di antara dua sujud." },
+  { icon: "☝️", points: 35, description: "Duduk dan membaca tasyahud pertama." },
+  { icon: "🕌", points: 40, description: "Duduk membaca tasyahud akhir dan shalawat nabi." },
+  { icon: "✨", points: 50, description: "Menoleh ke kanan dan ke kiri untuk mengakhiri sholat." }
 ];
 
-export default function JalurPetualangan() {
-  // Anggap saja Ahmad saat ini baru menyelesaikan sampai level 3 (bisa disesuaikan nanti dengan state global/backend)
-  const [currentLevel, setCurrentLevel] = useState(3);
-  const [selectedLevel, setSelectedLevel] = useState(levelsData[2]);
+export default function JalurPetualangan({ setActivePage }) {
+  const { profile, setActiveGuideIndex } = useApp();
+
+  // Create levelsData dynamically from SHOLAT_MOVEMENTS
+  const levelsData = SHOLAT_MOVEMENTS.map((movement, idx) => {
+    const meta = movementMetadata[idx] || { icon: "✨", points: 10, description: "" };
+    return {
+      id: idx + 1,
+      name: movement.nameKids,
+      fullName: movement.name,
+      icon: meta.icon,
+      points: meta.points,
+      description: movement.explanationKids || meta.description,
+      key: movement.key
+    };
+  });
+
+  // Calculate currentLevel dynamically based on completedMovements
+  const currentLevelIndex = SHOLAT_MOVEMENTS.findIndex(m => !profile.completedMovements.includes(m.key));
+  const currentLevel = currentLevelIndex === -1 ? SHOLAT_MOVEMENTS.length + 1 : currentLevelIndex + 1; // 1-indexed
+
+  const [selectedLevel, setSelectedLevel] = useState(() => {
+    const activeIdx = currentLevelIndex === -1 ? 0 : currentLevelIndex;
+    return levelsData[activeIdx] || levelsData[0];
+  });
+
+  const handleStartMission = () => {
+    if (selectedLevel) {
+      setActiveGuideIndex(selectedLevel.id - 1); // 0-indexed index for guide page
+      if (setActivePage) {
+        setActivePage('prayer-guide');
+      }
+    }
+  };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
+    <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }} className="animate-fadeInUp">
 
       {/* Header Halaman */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
@@ -32,7 +63,7 @@ export default function JalurPetualangan() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '24px', alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', alignItems: 'start' }}>
 
         {/* Sisi Kiri: Peta Petualangan Ular Tangga / Zig-zag */}
         <div className="adventure-map" style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
@@ -64,7 +95,7 @@ export default function JalurPetualangan() {
                         top: '35px',
                         width: '30px',
                         height: '6px',
-                        backgroundColor: isCompleted ? 'var(--primary, #1AA88E)' : '#CBD5E1',
+                        backgroundColor: isCompleted ? '#22C55E' : '#CBD5E1',
                         zIndex: -1
                       }}
                     />
@@ -82,7 +113,7 @@ export default function JalurPetualangan() {
                       background: isCurrent
                         ? 'linear-gradient(135deg, #F5A623, #D0870B)'
                         : isCompleted
-                          ? 'linear-gradient(135deg, var(--primary, #1AA88E), var(--primary-dark, #137A67))'
+                          ? 'linear-gradient(135deg, #22C55E, #15803D)'
                           : '#E2E8F0',
                       boxShadow: isLocked ? 'none' : '4px 4px 0px #000000',
                       cursor: isLocked ? 'not-allowed' : 'pointer',
@@ -135,8 +166,8 @@ export default function JalurPetualangan() {
           }}>
             <div style={{ fontSize: '60px', marginBottom: '12px' }}>{selectedLevel.icon}</div>
             <span style={{
-              background: 'var(--primary-light, #E8F7F4)',
-              color: 'var(--primary, #1AA88E)',
+              background: '#E8F7F4',
+              color: '#10B981',
               padding: '4px 12px',
               borderRadius: '20px',
               fontSize: '12px',
@@ -184,7 +215,7 @@ export default function JalurPetualangan() {
               cursor: 'pointer',
               transition: 'transform 0.1s'
             }}
-              onClick={() => alert(`Memulai misi belajar gerakan ${selectedLevel.name}! ✨`)}
+              onClick={handleStartMission}
               onMouseDown={(e) => e.currentTarget.style.transform = 'translateY(2px)'}
               onMouseUp={(e) => e.currentTarget.style.transform = 'none'}
             >

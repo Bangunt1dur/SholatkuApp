@@ -4,6 +4,9 @@ import { ACHIEVEMENTS } from '../data/GameData'; // Rumah baru data gamifikasi
 
 const AppContext = createContext(null);
 
+// ─── URL API BACKEND (PHP di Jagoan Hosting) ──────────────────
+const API_URL = 'https://sholatku.web.id/api.php';
+
 // ─── LOCALSTORAGE HELPERS ─────────────────────────────────────
 const loadFromStorage = (key, fallback) => {
   try {
@@ -22,13 +25,31 @@ const saveToStorage = (key, value) => {
 
 const getTodayDateString = () => new Date().toISOString().split('T')[0];
 
-// ─── DEFAULT STATES ───────────────────────────────────────────
+// Auto-Purge old mock data (barry, mock 30-day history) from LocalStorage
+if (typeof window !== 'undefined') {
+  try {
+    const storedProfile = JSON.parse(localStorage.getItem('sholatku_profile') || '{}');
+    const storedUser = JSON.parse(localStorage.getItem('sholatku_userAccount') || '{}');
+    const storedStreak = JSON.parse(localStorage.getItem('sholatku_streakHistory') || '[]');
+    
+    // If old mock name or mock history is present, clear storage for clean fresh start
+    if (storedProfile.name === 'barry' || storedProfile.name === 'Ahmad' || storedProfile.gems === 5 || storedUser.name === 'Pramudya' || storedStreak.length > 5) {
+      localStorage.removeItem('sholatku_profile');
+      localStorage.removeItem('sholatku_streakHistory');
+      localStorage.removeItem('sholatku_prayerPunctuality');
+      localStorage.removeItem('sholatku_userAccount');
+      localStorage.removeItem('sholatku_parentTarget');
+    }
+  } catch (e) {}
+}
+
+// ─── DEFAULT STATES (FRESH NEW USER) ───────────────────────────
 const DEFAULT_PROFILE = {
-  name: 'Ahmad',
+  name: 'Teman Sholat',
   level: 1,
   xp: 0,
   xpToNext: 100,
-  gems: 5,
+  gems: 0,
   stars: 0,
   completedMovements: [],
   quizCorrect: 0,
@@ -38,6 +59,8 @@ const DEFAULT_PROFILE = {
   subuhDone: false,
   earnedBadges: [],
   totalPrayers: 0,
+  readSurahs: [],
+  lastReadSurah: null
 };
 
 const DEFAULT_TRACKER = {
@@ -49,37 +72,6 @@ const DEFAULT_TRACKER = {
   isha: false,
 };
 
-const generateMockHistory = () => {
-  const history = [];
-  const details = {};
-  const today = new Date();
-  
-  // Generate data for the past 30 days
-  for (let i = 30; i > 0; i--) {
-    const d = new Date();
-    d.setDate(today.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
-    
-    // Child sholats 3 to 5 times a day (mostly 4 or 5)
-    const count = Math.floor(Math.random() * 3) + 3; // 3, 4, 5
-    history.push({ date: dateStr, count });
-    
-    const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
-    details[dateStr] = {};
-    
-    // Randomly assign which prayers were done and whether they were tepat/terlambat
-    let assigned = 0;
-    while (assigned < count) {
-      const p = prayers[Math.floor(Math.random() * 5)];
-      if (!details[dateStr][p]) {
-        details[dateStr][p] = Math.random() > 0.35 ? 'tepat' : 'terlambat';
-        assigned++;
-      }
-    }
-  }
-  return { history, details };
-};
-
 // =========================================================================
 // PROVIDER UTAMA (OTAK LOGIKA GLOBAL)
 // =========================================================================
@@ -87,10 +79,11 @@ export function AppProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(() => loadFromStorage('sholatku_isLoggedIn', false));
   const [activeProfile, setActiveProfile] = useState(() => loadFromStorage('sholatku_activeProfile', null));
   const [userAccount, setUserAccount] = useState(() => loadFromStorage('sholatku_userAccount', {
-    name: 'Pramudya',
-    email: 'pramudya@sholatku.com',
+    name: 'Teman Sholat',
+    email: 'user@sholatku.app',
     password: 'password123',
-    pin: '1234'
+    pin: '1234',
+    role: 'anak'
   }));
 
   const [isKidsMode, setIsKidsMode] = useState(() => loadFromStorage('sholatku_kidsMode', true));
@@ -99,7 +92,7 @@ export function AppProvider({ children }) {
   // Gembok Mode Dewasa (Parental Gate)
   const [isPinModalOpen, setIsPinModalOpen] = useState(false); 
 
-  // Profile & Gamifikasi State
+  // Profile & Gamifikasi State (Fresh default)
   const [profile, setProfileRaw] = useState(() => ({
     ...DEFAULT_PROFILE,
     ...loadFromStorage('sholatku_profile', {}),
@@ -108,7 +101,6 @@ export function AppProvider({ children }) {
   // Daily Prayer Tracker State
   const [tracker, setTrackerRaw] = useState(() => {
     const stored = loadFromStorage('sholatku_tracker', DEFAULT_TRACKER);
-    // Jika ganti hari, reset tracker harian ke false semua
     if (stored.date !== getTodayDateString()) {
       return { ...DEFAULT_TRACKER, date: getTodayDateString() };
     }
@@ -117,8 +109,8 @@ export function AppProvider({ children }) {
 
   // Target Orang Tua
   const [parentTarget, setParentTargetRaw] = useState(() => loadFromStorage('sholatku_parentTarget', {
-    targetCount: 120,
-    reward: 'Mainan LEGO Creator 🧱',
+    targetCount: 30,
+    reward: 'Hadiah Ibadah 🎁',
     isClaimed: false
   }));
 
@@ -127,13 +119,9 @@ export function AppProvider({ children }) {
     saveToStorage('sholatku_parentTarget', val);
   }, []);
 
-  // Detail Ketepatan Waktu Sholat
+  // Detail Ketepatan Waktu Sholat (Kosong untuk akun baru)
   const [prayerPunctuality, setPrayerPunctualityRaw] = useState(() => {
-    const stored = loadFromStorage('sholatku_prayerPunctuality', null);
-    if (stored) return stored;
-    
-    const mock = generateMockHistory();
-    return mock.details;
+    return loadFromStorage('sholatku_prayerPunctuality', {});
   });
 
   const setPrayerPunctuality = useCallback((updater) => {
@@ -144,21 +132,17 @@ export function AppProvider({ children }) {
     });
   }, []);
 
-  // Riwayat Sholat (90 Hari Terakhir) untuk Kalender Streak
+  // Riwayat Sholat untuk Kalender (Kosong untuk akun baru)
   const [streakHistory, setStreakHistoryRaw] = useState(() => {
-    const stored = loadFromStorage('sholatku_streakHistory', []);
-    if (stored && stored.length > 0) return stored;
-    
-    const mock = generateMockHistory();
-    saveToStorage('sholatku_streakHistory', mock.history);
-    saveToStorage('sholatku_prayerPunctuality', mock.details);
-    return mock.history;
+    return loadFromStorage('sholatku_streakHistory', []);
   });
 
   // Petualangan / Adventure Progress
   const [adventureLevel, setAdventureLevelRaw] = useState(() =>
     loadFromStorage('sholatku_adventureLevel', 0)
   );
+
+  const [activeGuideIndex, setActiveGuideIndex] = useState(0);
 
   // ─── PERSISTENCE WRAPPERS (Fungsi Pengupdate Penyimpanan) ───
   const setProfile = useCallback((updater) => {
@@ -191,30 +175,6 @@ export function AppProvider({ children }) {
   }, []);
 
   // ─── AUTHENTICATION ACTIONS ───
-  const login = useCallback((email, password) => {
-    if (email === userAccount.email && password === userAccount.password) {
-      setIsLoggedIn(true);
-      saveToStorage('sholatku_isLoggedIn', true);
-      return { success: true };
-    }
-    return { success: false, message: 'Email atau password salah!' };
-  }, [userAccount]);
-
-  const register = useCallback((data) => {
-    const newAcc = {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      pin: data.pin || '1234'
-    };
-    setUserAccount(newAcc);
-    saveToStorage('sholatku_userAccount', newAcc);
-    setIsLoggedIn(true);
-    saveToStorage('sholatku_isLoggedIn', true);
-    setProfile(p => ({ ...p, name: data.name }));
-    return { success: true };
-  }, [setProfile]);
-
   const selectProfile = useCallback((role) => {
     setActiveProfile(role);
     saveToStorage('sholatku_activeProfile', role);
@@ -226,6 +186,85 @@ export function AppProvider({ children }) {
       saveToStorage('sholatku_kidsMode', false);
     }
   }, []);
+
+  const login = useCallback(async (email, password) => {
+    try {
+      // Coba login via API server (MySQL)
+      const res = await fetch(`${API_URL}?action=login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        const acc = { ...data.user, password }; // simpan password lokal untuk fallback
+        setUserAccount(acc);
+        saveToStorage('sholatku_userAccount', acc);
+        saveToStorage('sholatku_userId', data.user.id);
+        setIsLoggedIn(true);
+        saveToStorage('sholatku_isLoggedIn', true);
+        // Muat profil dari server
+        if (data.profile) {
+          setProfile(p => ({ ...p, ...data.profile }));
+        }
+        selectProfile(data.user.role);
+        return { success: true };
+      } else {
+        return { success: false, message: data.message || 'Email atau password salah!' };
+      }
+    } catch (err) {
+      // Fallback ke localStorage jika server tidak terjangkau
+      console.warn('API tidak terjangkau, fallback ke localStorage:', err);
+      if (email === userAccount.email && password === userAccount.password) {
+        setIsLoggedIn(true);
+        saveToStorage('sholatku_isLoggedIn', true);
+        if (userAccount.role) selectProfile(userAccount.role);
+        return { success: true };
+      }
+      return { success: false, message: 'Email atau password salah!' };
+    }
+  }, [userAccount, selectProfile, setProfile]);
+
+  const register = useCallback(async (data) => {
+    try {
+      // Coba register via API server (MySQL)
+      const res = await fetch(`${API_URL}?action=register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        const acc = { ...result.user, password: data.password };
+        setUserAccount(acc);
+        saveToStorage('sholatku_userAccount', acc);
+        saveToStorage('sholatku_userId', result.user.id);
+        setIsLoggedIn(true);
+        saveToStorage('sholatku_isLoggedIn', true);
+        setProfile(p => ({ ...p, name: data.name }));
+        selectProfile(acc.role);
+        return { success: true };
+      } else {
+        return { success: false, message: result.message || 'Registrasi gagal!' };
+      }
+    } catch (err) {
+      // Fallback ke localStorage jika server tidak terjangkau
+      console.warn('API tidak terjangkau, fallback ke localStorage:', err);
+      const newAcc = {
+        name: data.name, email: data.email,
+        password: data.password, pin: data.pin || '1234', role: data.role || 'anak'
+      };
+      setUserAccount(newAcc);
+      saveToStorage('sholatku_userAccount', newAcc);
+      setIsLoggedIn(true);
+      saveToStorage('sholatku_isLoggedIn', true);
+      setProfile(p => ({ ...p, name: data.name }));
+      selectProfile(newAcc.role);
+      return { success: true };
+    }
+  }, [setProfile, selectProfile]);
 
   const logout = useCallback(() => {
     setIsLoggedIn(false);
@@ -300,6 +339,29 @@ export function AppProvider({ children }) {
     addGems(1);
   }, [setProfile, addXP, addGems]);
 
+  // ─── SINKRONISASI TRACKER KE SERVER ────────────────────────
+  const syncTrackerToServer = useCallback(async (trackerData) => {
+    const userId = loadFromStorage('sholatku_userId', null);
+    if (!userId) return; // Skip jika belum login via server
+    try {
+      await fetch(`${API_URL}?action=save_tracker`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          date:    trackerData.date,
+          fajr:    trackerData.fajr    ? 1 : 0,
+          dhuhr:   trackerData.dhuhr   ? 1 : 0,
+          asr:     trackerData.asr     ? 1 : 0,
+          maghrib: trackerData.maghrib ? 1 : 0,
+          isha:    trackerData.isha    ? 1 : 0,
+        })
+      });
+    } catch (err) {
+      console.warn('Gagal sinkron tracker ke server:', err);
+    }
+  }, []);
+
   // ─── ABSEN SHOLAT & PERHITUNGAN STREAK ──────────────────────
   const togglePrayer = useCallback((prayerKey) => {
     setTracker((prev) => {
@@ -362,9 +424,12 @@ export function AppProvider({ children }) {
         setProfile((p) => ({ ...p, subuhDone: true }));
       }
 
+      // Sinkron ke server MySQL
+      syncTrackerToServer(next);
+
       return next;
     });
-  }, [setTracker, addXP, addStars, addGems, setProfile, setStreakHistory, setPrayerPunctuality]);
+  }, [setTracker, addXP, addStars, addGems, setProfile, setStreakHistory, setPrayerPunctuality, syncTrackerToServer]);
 
   // Efek Otomatis untuk Kalkulasi Streak Beruntun dari History
   useEffect(() => {
@@ -399,14 +464,48 @@ export function AppProvider({ children }) {
       setProfile((p) => ({ ...p, earnedBadges: [...p.earnedBadges, ...newBadges] }));
     }
   }, [profile, setProfile]);
+  // Menandai surah Al-Qur'an yang dibaca & melacak progress Al-Qur'an
+  const markSurahRead = useCallback((surahNumber, surahName, surahLatin) => {
+    setProfile((prev) => {
+      const readSurahs = prev.readSurahs || [];
+      const alreadyRead = readSurahs.includes(surahNumber);
+      const nextReadSurahs = alreadyRead ? readSurahs : [...readSurahs, surahNumber];
+      return {
+        ...prev,
+        readSurahs: nextReadSurahs,
+        lastReadSurah: { number: surahNumber, name: surahName, latin: surahLatin, date: getTodayDateString() },
+        xp: prev.xp + (alreadyRead ? 0 : 15)
+      };
+    });
+  }, [setProfile]);
+
+  // Reset ulang seluruh data dummy agar menjadi akun baru fresh
+  const resetAllData = useCallback(() => {
+    localStorage.clear();
+    setProfileRaw(DEFAULT_PROFILE);
+    setTrackerRaw(DEFAULT_TRACKER);
+    setPrayerPunctualityRaw({});
+    setStreakHistoryRaw([]);
+    setAdventureLevelRaw(0);
+    saveToStorage('sholatku_profile', DEFAULT_PROFILE);
+    saveToStorage('sholatku_tracker', DEFAULT_TRACKER);
+  }, []);
 
   // Perhitungan ringkas helper
   const trackedPrayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
   const prayersDoneToday = trackedPrayers.filter((k) => tracker[k]).length;
 
+  const updateParentPin = useCallback((newPin) => {
+    setUserAccount((prev) => {
+      const next = { ...prev, pin: newPin };
+      saveToStorage('sholatku_userAccount', next);
+      return next;
+    });
+  }, []);
+
   const value = {
     isLoggedIn, login, register, logout,
-    activeProfile, selectProfile, userAccount,
+    activeProfile, selectProfile, userAccount, updateParentPin,
     isKidsMode, toggleMode,
     requestModeChange, isPinModalOpen, setIsPinModalOpen,
     sidebarOpen, setSidebarOpen,
@@ -414,8 +513,10 @@ export function AppProvider({ children }) {
     tracker, togglePrayer, prayersDoneToday,
     streakHistory,
     adventureLevel, setAdventureLevel,
+    activeGuideIndex, setActiveGuideIndex,
     addXP, addStars, addGems,
     completeMovement, recordQuizCorrect,
+    markSurahRead, resetAllData,
     parentTarget, setParentTarget,
     prayerPunctuality, setPrayerPunctuality,
   };

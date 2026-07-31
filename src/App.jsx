@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import AppSidebar from './components/Shared/Sidebar';
 import AppHeader from './components/Shared/Header';
+import AppFooter from './components/Shared/Footer';
 import HomePage from './pages/HomePage';
 import SholatGuidePage from './pages/SholatGuidePage';
 import PrayerTrackerPage from './pages/SholatTrackerPage';
@@ -106,19 +107,45 @@ function ParentalGateModal({ setActivePage }) {
 
 function AppContent() {
   const { isLoggedIn, activeProfile, sidebarOpen, isKidsMode } = useApp();
-  const [activePage, setActivePage] = useState('landing');
+  const [activePage, setActivePageState] = useState(() => {
+    const hash = window.location.hash.replace('#', '');
+    return hash || 'landing';
+  });
+
+  const setActivePage = useCallback((newPage, pushHistory = true) => {
+    setActivePageState((prev) => {
+      if (prev !== newPage && pushHistory) {
+        window.history.pushState({ page: newPage }, '', `#${newPage}`);
+      }
+      return newPage;
+    });
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = (e) => {
+      const pageFromState = e.state?.page;
+      const hashPage = window.location.hash.replace('#', '');
+      const targetPage = pageFromState || hashPage || 'landing';
+      setActivePageState(targetPage);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   useEffect(() => {
     if (!isLoggedIn) {
-      if (activePage !== 'login' && activePage !== 'register') {
-        setActivePage('landing');
+      if (activePage !== 'login' && activePage !== 'register' && activePage !== 'landing') {
+        setActivePage('landing', false);
       }
     } else {
       if (!activeProfile) {
-        setActivePage('profile-picker');
+        if (activePage !== 'profile-picker') {
+          setActivePage('profile-picker', false);
+        }
       } else if (activePage === 'landing' || activePage === 'login' || activePage === 'register' || activePage === 'profile-picker') {
-        // Jika profile anak aktif, arahkan ke home. Jika orang tua, ke parent-dashboard
-        setActivePage(activeProfile === 'anak' ? 'home' : activeProfile === 'dewasa' ? 'adult-quran' : 'parent-dashboard');
+        const defaultTarget = activeProfile === 'anak' ? 'home' : activeProfile === 'dewasa' ? 'adult-quran' : 'parent-dashboard';
+        setActivePage(defaultTarget, false);
       }
     }
   }, [isLoggedIn, activeProfile]);
@@ -150,19 +177,19 @@ function AppContent() {
       case 'quiz':
         return <SholatQuizPage />;
       case 'adventure':
-        return <AdventurePage />;
+        return <AdventurePage setActivePage={setActivePage} />;
       case 'profile':
         return <ProfilePage />;
       case 'child-dashboard': // Jalur menu untuk Dashboard Anak
         return <ChildDashboardPage />;
       case 'parent-dashboard':
-        return <ParentDashboardPage section="overview" />;
+        return <ParentDashboardPage section="overview" setActivePage={setActivePage} />;
       case 'parent-punctuality':
-        return <ParentDashboardPage section="punctuality" />;
+        return <ParentDashboardPage section="punctuality" setActivePage={setActivePage} />;
       case 'parent-missed':
-        return <ParentDashboardPage section="missed" />;
+        return <ParentDashboardPage section="missed" setActivePage={setActivePage} />;
       case 'parent-target':
-        return <ParentDashboardPage section="target" />;
+        return <ParentDashboardPage section="target" setActivePage={setActivePage} />;
       case 'adult-quran':
         return <DasboardDewasa section="quran" />;
       case 'adult-guide':
@@ -173,6 +200,8 @@ function AppContent() {
         return <DasboardDewasa section="kiblat" />;
       case 'adult-dzikir':
         return <DasboardDewasa section="dzikir" />;
+      case 'adult-kajian':
+        return <DasboardDewasa section="kajian" />;
       default:
         return <HomePage setActivePage={setActivePage} />;
     }
@@ -198,6 +227,9 @@ function AppContent() {
         <main className="dashboard-main-core">
           {renderPage()}
         </main>
+
+        {/* Footer Desktop */}
+        <AppFooter />
       </div>
 
       <ParentalGateModal setActivePage={setActivePage} />

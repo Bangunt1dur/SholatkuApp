@@ -46,6 +46,29 @@ export default function RegisterPage({ setActivePage }) {
           boxShadow: '0 8px 0px rgba(17, 60, 43, 0.15)'
         }}
       >
+        <div style={{ textAlign: 'left', marginBottom: '16px' }}>
+          <button 
+            type="button"
+            onClick={() => setActivePage('landing')} 
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '6px', 
+              backgroundColor: '#D4DDD3', 
+              border: '2px solid #113C2B', 
+              borderRadius: '10px',
+              color: '#113C2B', 
+              fontWeight: 900, 
+              fontSize: '13px', 
+              cursor: 'pointer', 
+              padding: '6px 12px',
+              boxShadow: '2px 2px 0px #113C2B'
+            }}
+          >
+            ← Kembali ke Beranda
+          </button>
+        </div>
+
         <h2 style={{ fontSize: '28px', fontWeight: 900, marginBottom: '6px', color: '#113C2B' }}>
           Join the Journey
         </h2>
@@ -64,18 +87,19 @@ export default function RegisterPage({ setActivePage }) {
           {/* Who are you role picker */}
           <div>
             <label style={{ display: 'block', fontWeight: 800, fontSize: '14px', marginBottom: '8px', color: '#113C2B' }}>Who are you?</label>
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '8px' }}>
               <div 
                 onClick={() => setRole('anak')}
                 style={{
                   flex: 1,
-                  padding: '12px',
+                  padding: '10px 6px',
                   border: '3px solid #113C2B',
                   borderRadius: '12px',
                   cursor: 'pointer',
                   textAlign: 'center',
                   fontWeight: 900,
-                  backgroundColor: role === 'anak' ? '#113C2B' : '#D4DDD3', // Aktif: hijau tua, Pasif: sage muda
+                  fontSize: '13px',
+                  backgroundColor: role === 'anak' ? '#113C2B' : '#D4DDD3',
                   color: role === 'anak' ? '#ffffff' : '#113C2B',
                   boxShadow: role === 'anak' ? '0 4px 0px rgba(17, 60, 43, 0.2)' : 'none',
                   transition: 'all 0.1s ease'
@@ -84,22 +108,23 @@ export default function RegisterPage({ setActivePage }) {
                 👶 Anak-anak
               </div>
               <div 
-                onClick={() => setRole('ortu')}
+                onClick={() => setRole('dewasa')}
                 style={{
                   flex: 1,
-                  padding: '12px',
+                  padding: '10px 6px',
                   border: '3px solid #113C2B',
                   borderRadius: '12px',
                   cursor: 'pointer',
                   textAlign: 'center',
                   fontWeight: 900,
-                  backgroundColor: role === 'ortu' ? '#113C2B' : '#D4DDD3',
-                  color: role === 'ortu' ? '#ffffff' : '#113C2B',
-                  boxShadow: role === 'ortu' ? '0 4px 0px rgba(17, 60, 43, 0.2)' : 'none',
+                  fontSize: '13px',
+                  backgroundColor: role === 'dewasa' ? '#113C2B' : '#D4DDD3',
+                  color: role === 'dewasa' ? '#ffffff' : '#113C2B',
+                  boxShadow: role === 'dewasa' ? '0 4px 0px rgba(17, 60, 43, 0.2)' : 'none',
                   transition: 'all 0.1s ease'
                 }}
               >
-                👨‍👩‍👦 Orang Tua
+                🧔 Dewasa
               </div>
             </div>
           </div>

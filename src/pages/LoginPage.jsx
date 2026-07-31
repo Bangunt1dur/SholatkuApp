@@ -42,6 +42,29 @@ export default function LoginPage({ setActivePage }) {
           boxShadow: '0 8px 0px rgba(17, 60, 43, 0.15)' 
         }}
       >
+        <div style={{ textAlign: 'left', marginBottom: '16px' }}>
+          <button 
+            type="button"
+            onClick={() => setActivePage('landing')} 
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '6px', 
+              backgroundColor: '#D4DDD3', 
+              border: '2px solid #113C2B', 
+              borderRadius: '10px',
+              color: '#113C2B', 
+              fontWeight: 900, 
+              fontSize: '13px', 
+              cursor: 'pointer', 
+              padding: '6px 12px',
+              boxShadow: '2px 2px 0px #113C2B'
+            }}
+          >
+            ← Kembali ke Beranda
+          </button>
+        </div>
+
         <h2 
           style={{ 
             fontSize: '32px', 
@@ -53,6 +76,9 @@ export default function LoginPage({ setActivePage }) {
         >
           LOGIN
         </h2>
+        <p style={{ fontSize: '13px', fontWeight: 700, color: '#556B52', marginBottom: '20px' }}>
+          Masukkan akun Anda atau gunakan demo (<code>pramudya@sholatku.com</code>)
+        </p>
 
         {error && (
           <div 
@@ -122,22 +148,7 @@ export default function LoginPage({ setActivePage }) {
             />
           </div>
 
-          <div 
-            style={{ 
-              fontSize: '13px', 
-              color: '#113C2B', 
-              fontWeight: 700, 
-              margin: '2px 0 4px',
-              borderRadius: '14px',
-              padding: '12px',
-              backgroundColor: '#D4DDD3', 
-              border: '2px dashed #113C2B'
-            }}
-          >
-            💡 Coba akun demo: <br />
-            Email: <span style={{ textDecoration: 'underline' }}>pramudya@sholatku.com</span> <br />
-            Password: <span style={{ textDecoration: 'underline' }}>password123</span>
-          </div>
+
 
           <button 
             type="submit" 

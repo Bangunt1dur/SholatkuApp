@@ -4,10 +4,29 @@ import { SHOLAT_MOVEMENTS } from '../data/sholatData';
 import MascotRafi from '../components/Shared/MascotRafi';
 
 export default function HomePage({ setActivePage }) {
-  const { profile, prayersDoneToday } = useApp();
+  const { profile, prayersDoneToday, parentTarget, streakHistory } = useApp();
   const completedCount = profile.completedMovements?.length || 0;
   const totalMovements = SHOLAT_MOVEMENTS?.length || 11;
   const xpPercent = Math.min(100, Math.round((profile.xp / profile.xpToNext) * 100));
+
+  const today = new Date();
+  const past30Days = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(today.getDate() - i);
+    past30Days.push(d.toISOString().split('T')[0]);
+  }
+
+  let totalPrayers30Days = 0;
+  past30Days.forEach(dateStr => {
+    const isToday = dateStr === today.toISOString().split('T')[0];
+    const entry = isToday
+      ? { count: prayersDoneToday }
+      : (streakHistory || []).find(h => h.date === dateStr);
+    totalPrayers30Days += entry?.count ?? 0;
+  });
+
+  const progressPercentage = Math.min(100, Math.round((totalPrayers30Days / (parentTarget?.targetCount || 120)) * 100));
 
   // Gaya Dasar Kartu Neo-Brutalisme (Warna Awal)
   const neobrutalistCardBase = {
@@ -67,7 +86,7 @@ export default function HomePage({ setActivePage }) {
               borderRadius: '14px', 
               boxShadow: '3px 3px 0px #000',
               color: 'var(--game-purple)'
-            }}>{profile.name || 'Ahmad'}!</span> 👋
+            }}>{profile.name || 'Teman Sholat'}!</span> 👋
           </h1>
           <p style={{ fontSize: '15px', fontWeight: 800, color: '#555', margin: 0, lineHeight: 1.5 }}>
             Siap untuk petualangan hari ini? Jaga konsistensi sholatmu dan kumpulkan lebih banyak koin!
@@ -121,6 +140,38 @@ export default function HomePage({ setActivePage }) {
       <div style={{ marginBottom: '36px' }}>
         <MascotRafi />
       </div>
+
+      {/* ─── BANNER MISI HADIAH SPESIAL DARI ORANG TUA ─── */}
+      {parentTarget && (
+        <section style={{
+          ...neobrutalistCardBase,
+          border: '4px solid var(--game-purple, #712ae2)',
+          background: '#f5f3ff',
+          marginBottom: '32px',
+          boxShadow: '6px 6px 0px #5b21b6'
+        }}>
+          <div style={{ fontWeight: 900, fontSize: '18px', color: '#5b21b6', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>🎁</span> Misi Hadiah Spesial!
+          </div>
+          <p style={{ fontSize: '15px', fontWeight: 800, margin: '0 0 14px', color: '#4c1d95', lineHeight: 1.5 }}>
+            Papa & Mama menyiapkan hadiah: <strong style={{ textDecoration: 'underline', color: '#7c3aed' }}>{parentTarget.reward}</strong> jika kamu mencapai <strong>{parentTarget.targetCount} sholat</strong> dalam 30 hari!
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 900, marginBottom: '6px', color: '#4c1d95' }}>
+            <span>Progres Ibadahmu:</span>
+            <span>{totalPrayers30Days} / {parentTarget.targetCount} Sholat</span>
+          </div>
+          <div style={{ height: '22px', backgroundColor: '#e2e8f0', borderRadius: '12px', border: '3.5px solid #000', overflow: 'hidden', padding: '2px', boxSizing: 'border-box', marginBottom: '10px' }}>
+            <div style={{ height: '100%', width: `${progressPercentage}%`, backgroundColor: progressPercentage >= 100 ? '#10B981' : 'var(--game-purple, #712ae2)', borderRadius: '6px' }} />
+          </div>
+          <div style={{ fontSize: '13px', fontWeight: 900, textAlign: 'center', color: '#4c1d95', lineHeight: 1.4 }}>
+            {parentTarget.isClaimed 
+              ? '🎉 Selamat! Hadiah sudah diberikan oleh Papa/Mama! Terima kasih Ma, Pa! ❤️' 
+              : progressPercentage >= 100 
+                ? '🎉 Yey! Target tercapai! Laporkan ke Papa/Mama untuk ambil hadiahmu sekarang! 🎁' 
+                : `Kurang ${Math.max(0, parentTarget.targetCount - totalPrayers30Days)} sholat lagi untuk mendapatkan hadiah! Semangat terus, kamu pasti bisa! 💪`}
+          </div>
+        </section>
+      )}
 
       {/* ─── TRACK PERJALANAN SHOLAT (MENU UTAMA ANAK) ─── */}
       <h2 style={{ fontSize: '26px', fontWeight: 900, marginBottom: '20px', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '8px' }}>
