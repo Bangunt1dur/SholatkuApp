@@ -3,6 +3,11 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, CheckCircle, Volume2, Mic, Check, BookOpen } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import AudioPlayer from '../components/UI/AudioPlayer';
+import rukukGif from '../assets/Rukuk.gif'; 
+import itidalGif from '../assets/I\'tidal.gif';
+import sujudGif from '../assets/Sujud.gif';
+import salamKananGif from '../assets/salam pertama(kanan).svg';
+import salamKiriGif from '../assets/salam ke dua.gif';
 
 const YOUTUBE_VIDEO_ID = 'TqRvfvAMtOc';
 
@@ -19,6 +24,18 @@ export default function PrayerGuide() {
   const completedMovements = profile?.completedMovements || [];
   const isCompleted = completedMovements.includes(movement?.key);
   const totalCount = movements.length;
+
+  const getMovementImage = (m) => {
+    if (!m) return '';
+    switch (m.key) {
+      case 'rukuk': return rukukGif;
+      case 'itidal': return itidalGif;
+      case 'sujud': return sujudGif;
+      case 'salam_pertama': return salamKananGif;
+      case 'salam_kedua': return salamKiriGif;
+      default: return m.image;
+    }
+  };
 
   const goNext = () => {
     if (currentIdx < totalCount - 1) setCurrentIdx(i => i + 1);
@@ -50,6 +67,8 @@ export default function PrayerGuide() {
       </div>
     );
   }
+
+  const movementImg = getMovementImage(movement);
 
   // KIDS LAYOUT
   if (isKids) {
@@ -150,9 +169,9 @@ export default function PrayerGuide() {
               width: '100%', height: '100%', minHeight: '260px',
               display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative'
             }}>
-              {movement.image ? (
+              {movementImg ? (
                 <img 
-                  src={movement.image} 
+                  src={movementImg} 
                   alt={movement.name} 
                   style={{ width: '220px', height: '220px', objectFit: 'contain', animation: 'float 3s ease-in-out infinite' }} 
                 />
@@ -315,11 +334,11 @@ export default function PrayerGuide() {
               borderRadius: '12px', padding: '24px', display: 'flex', justifyContent: 'center', alignItems: 'center',
               position: 'relative', marginBottom: '20px'
             }}>
-              {movement.image ? (
+              {movementImg ? (
                 <img 
-                  src={movement.image} 
+                  src={movementImg} 
                   alt={movement.name} 
-                  style={{ width: '150px', height: '150px', objectFit: 'contain' }} 
+                  style={{ width: '160px', height: '160px', objectFit: 'contain' }} 
                 />
               ) : (
                 <div style={{ fontSize: '70px' }}>
