@@ -1,144 +1,245 @@
 // src/pages/LoginPage.jsx
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Key, Mail, Lock, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
-export default function LoginPage({ onRegisterClick }) {
+export default function LoginPage({ onRegisterClick, setActivePage }) {
   const { login, currentUser, logout } = useApp();
-  const [identifier, setIdentifier] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  const handleRegisterNavigation = () => {
+    if (onRegisterClick) onRegisterClick();
+    if (setActivePage) setActivePage('register');
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
-    if (!identifier || !password) {
+
+    if (!email || !password) {
       setError('Harap lengkapi semua kolom!');
       return;
     }
 
-    const res = login(identifier.trim(), password);
+    const res = login(email.trim(), password);
     if (res.success) {
-      setSuccessMsg('Login berhasil! Mengarahkan...');
-      setIdentifier('');
-      setPassword('');
+      setSuccessMsg('Login berhasil!');
+      if (setActivePage) {
+        setActivePage('profile-picker');
+      }
     } else {
-      setError(res.message);
+      setError(res.message || 'Login gagal. Periksa kembali email dan password Anda.');
     }
   };
 
   return (
-    <div style={{
-      display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '85vh',
-      padding: '20px', background: 'transparent'
-    }}>
-      <div className="clay-card animate-fadeInUp" style={{
-        maxWidth: '400px', width: '100%', padding: '32px', background: '#ffffff',
-        border: '1px solid #e2e8f0', borderRadius: '16px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)',
-        position: 'relative'
-      }}>
-        
-        {/* Logo App */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+    <div 
+      style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        padding: '16px',
+        backgroundColor: '#B8C6B6'
+      }}
+    >
+      <div 
+        style={{ 
+          maxWidth: '420px', 
+          width: '100%', 
+          textAlign: 'center', 
+          backgroundColor: '#FFFFFF', 
+          borderRadius: '24px', 
+          padding: '36px 32px',
+          border: '4px solid #113C2B', 
+          boxShadow: '0 8px 0px rgba(17, 60, 43, 0.15)' 
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <div style={{ fontSize: '48px', animation: 'float 3s ease-in-out infinite' }}>🕌</div>
-          <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: '28px', color: '#0F172A', margin: '8px 0 2px', whiteSpace: 'nowrap' }}>
-            Sholat<span style={{ color: '#059669' }}>Ku</span>
+          <h2 
+            style={{ 
+              fontSize: '32px', 
+              fontWeight: 900, 
+              marginBottom: '4px', 
+              letterSpacing: '-1px',
+              color: '#113C2B' 
+            }}
+          >
+            LOGIN
           </h2>
-          <p style={{ fontSize: '13px', color: '#64748B', fontWeight: 600, margin: 0 }}>
+          <p style={{ fontSize: '13px', color: '#556B52', fontWeight: 700, margin: 0 }}>
             Tuntunan Belajar Sholat Kaidah Muhammadiyah
           </p>
         </div>
 
-        {/* Notifications */}
         {error && (
-          <div style={{
-            background: '#FFF5F5', border: '1px solid #FEB2B2', borderRadius: '8px', padding: '10px 14px',
-            color: '#C53030', fontSize: '12.5px', fontWeight: 700, marginBottom: '16px', textAlign: 'center'
-          }}>
-            ❌ {error}
+          <div 
+            style={{ 
+              backgroundColor: '#fee2e2', 
+              border: '3px solid #ef4444', 
+              borderRadius: '12px', 
+              padding: '10px', 
+              color: '#b91c1c', 
+              fontWeight: 800, 
+              fontSize: '13px', 
+              marginBottom: '16px' 
+            }}
+          >
+            ⚠️ {error}
           </div>
         )}
+
         {successMsg && (
-          <div style={{
-            background: '#F0FDF4', border: '1px solid #A7F3D0', borderRadius: '8px', padding: '10px 14px',
-            color: '#15803d', fontSize: '12.5px', fontWeight: 700, marginBottom: '16px', textAlign: 'center'
-          }}>
+          <div 
+            style={{ 
+              backgroundColor: '#dcfce7', 
+              border: '3px solid #22c55e', 
+              borderRadius: '12px', 
+              padding: '10px', 
+              color: '#15803d', 
+              fontWeight: 800, 
+              fontSize: '13px', 
+              marginBottom: '16px' 
+            }}
+          >
             🎉 {successMsg}
           </div>
         )}
 
         {currentUser ? (
           <div style={{ textAlign: 'center', padding: '12px 0' }}>
-            <p style={{ fontWeight: 700, color: '#334155', fontSize: '14px', marginBottom: '20px' }}>
+            <p style={{ fontWeight: 800, color: '#113C2B', fontSize: '15px', marginBottom: '20px' }}>
               Anda masuk sebagai <strong style={{ color: '#059669' }}>{currentUser.name}</strong> ({currentUser.role === 'parent' ? 'Orang Tua' : currentUser.role})
             </p>
             <button
               onClick={() => logout()}
-              className="clay-btn purple w-full"
-              style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              style={{
+                width: '100%',
+                padding: '14px',
+                backgroundColor: '#ef4444',
+                color: '#FFFFFF',
+                borderRadius: '14px',
+                border: 'none',
+                fontWeight: 900,
+                cursor: 'pointer',
+                boxShadow: '0 4px 0px #991b1b',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px'
+              }}
             >
               <LogOut size={16} /> Keluar Sesi Akun
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label style={{ fontSize: '11px', fontWeight: 800, color: '#475569', letterSpacing: '0.5px' }}>EMAIL / USERNAME</label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-                <input
-                  type="text"
-                  placeholder="Contoh: parent@sholatku.com"
-                  value={identifier}
-                  onChange={e => setIdentifier(e.target.value)}
-                  style={{
-                    width: '100%', padding: '11px 12px 11px 40px', fontSize: '13.5px', fontWeight: 600,
-                    borderRadius: '10px', border: '1px solid #CBD5E1', outline: 'none', background: '#F8FAFC',
-                    transition: 'border-color 0.15s'
-                  }}
-                  required
-                />
-              </div>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'left' }}>
+            <div>
+              <label style={{ display: 'block', fontWeight: 800, fontSize: '14px', marginBottom: '8px', color: '#113C2B' }}>
+                Email / Username
+              </label>
+              <input 
+                type="text" 
+                placeholder="nama@email.com" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                style={{
+                  width: '100%',
+                  padding: '14px 16px',
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  border: '3px solid #113C2B', 
+                  borderRadius: '14px',
+                  boxSizing: 'border-box',
+                  outline: 'none',
+                  backgroundColor: '#F8FAF8',
+                  color: '#113C2B'
+                }}
+              />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label style={{ fontSize: '11px', fontWeight: 800, color: '#475569', letterSpacing: '0.5px' }}>PASSWORD</label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-                <input
-                  type="password"
-                  placeholder="Masukkan password Anda"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  style={{
-                    width: '100%', padding: '11px 12px 11px 40px', fontSize: '13.5px', fontWeight: 600,
-                    borderRadius: '10px', border: '1px solid #CBD5E1', outline: 'none', background: '#F8FAFC',
-                    transition: 'border-color 0.15s'
-                  }}
-                  required
-                />
-              </div>
+            <div>
+              <label style={{ display: 'block', fontWeight: 800, fontSize: '14px', marginBottom: '8px', color: '#113C2B' }}>
+                Password
+              </label>
+              <input 
+                type="password" 
+                placeholder="••••••••" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{
+                  width: '100%',
+                  padding: '14px 16px',
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  border: '3px solid #113C2B',
+                  borderRadius: '14px',
+                  boxSizing: 'border-box',
+                  outline: 'none',
+                  backgroundColor: '#F8FAF8',
+                  color: '#113C2B'
+                }}
+              />
             </div>
 
-            <button type="submit" className="clay-btn purple w-full" style={{ padding: '12px', marginTop: '6px', background: '#059669', borderColor: '#059669' }}>
-              <Key size={15} /> Masuk Akun
+            <div 
+              style={{ 
+                fontSize: '13px', 
+                color: '#113C2B', 
+                fontWeight: 700, 
+                margin: '2px 0 4px',
+                borderRadius: '14px',
+                padding: '12px',
+                backgroundColor: '#D4DDD3', 
+                border: '2px dashed #113C2B'
+              }}
+            >
+              💡 Coba akun demo: <br />
+              Email: <span style={{ textDecoration: 'underline' }}>pramudya@sholatku.com</span> <br />
+              Password: <span style={{ textDecoration: 'underline' }}>password123</span>
+            </div>
+
+            <button 
+              type="submit" 
+              style={{ 
+                fontSize: '16px', 
+                padding: '16px', 
+                backgroundColor: '#113C2B', 
+                color: '#FFFFFF', 
+                borderRadius: '14px',
+                border: 'none',
+                fontWeight: 900,
+                cursor: 'pointer',
+                boxShadow: '0 4px 0px #082218',
+                transition: 'all 0.1s ease'
+              }}
+            >
+              MASUK 🚀
             </button>
-
-            <div style={{ textAlign: 'center', marginTop: '12px' }}>
-              <span style={{ fontSize: '13px', color: '#64748B', fontWeight: 600 }}>Belum memiliki akun? </span>
-              <button
-                type="button"
-                onClick={onRegisterClick}
-                style={{ background: 'none', border: 'none', color: '#059669', fontWeight: 700, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
-              >
-                Daftar di sini
-              </button>
-            </div>
           </form>
         )}
+
+        <p style={{ marginTop: '28px', fontSize: '14px', fontWeight: 800, color: '#556B52' }}>
+          Belum punya akun?{' '}
+          <span 
+            onClick={handleRegisterNavigation} 
+            style={{ 
+              color: '#113C2B', 
+              cursor: 'pointer', 
+              textDecoration: 'underline',
+              fontWeight: 900
+            }}
+          >
+            Daftar sekarang
+          </span>
+        </p>
       </div>
     </div>
   );

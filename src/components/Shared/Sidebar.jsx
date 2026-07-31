@@ -1,35 +1,44 @@
 // src/components/Shared/Sidebar.jsx
 import { useApp } from '../../context/AppContext';
-import { Home, BookOpen, CheckSquare, ShieldAlert, User, Menu, X, Clock, Award, Map, LogOut, Book, Shield } from 'lucide-react';
+import { Home, BookOpen, CheckSquare, ShieldAlert, User, Menu, X, Clock, Award, Map, LogOut, Book, Shield, Compass, Gift, AlertTriangle } from 'lucide-react';
 
 export default function AppSidebar({ activePage, setActivePage }) {
   const { 
-    userMode, setUserMode, currentUser, activeChild, 
-    setIsPinModalOpen, sidebarOpen, setSidebarOpen, logout, isMobile 
+    userMode, setUserMode, currentUser, activeProfile, isKidsMode,
+    sidebarOpen, setSidebarOpen, logout, isMobile 
   } = useApp();
 
   const handleMenuClick = (pageId) => {
     setActivePage(pageId);
-    setSidebarOpen(false); // Close sidebar on mobile
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
   };
 
-  const isAdultTheme = userMode === 'adult' || userMode === 'parent' || userMode === 'admin';
+  const isAdultTheme = userMode === 'adult' || userMode === 'parent' || userMode === 'admin' || !isKidsMode;
 
-  // Define menus based on active mode
+  // Define menus based on active mode / profile
   let menuItems = [];
   if (userMode === 'admin') {
     menuItems = [
       { id: 'admin-panel', label: 'Dashboard Admin 🛠️', icon: <Shield size={20} /> }
     ];
-  } else if (userMode === 'parent') {
+  } else if (userMode === 'parent' || activeProfile === 'ortu') {
     menuItems = [
-      { id: 'parent-dashboard', label: 'Dashboard Ortu 👨‍👩‍👦', icon: <ShieldAlert size={20} /> }
+      { id: 'parent-dashboard', label: 'Dashboard Ortu 👨‍👩‍👦', icon: <ShieldAlert size={20} /> },
+      { id: 'parent-punctuality', label: 'Laporan Tepat Waktu ⏱️', icon: <Clock size={20} /> },
+      { id: 'parent-missed', label: 'Log Sholat Bolong ⚠️', icon: <AlertTriangle size={20} /> },
+      { id: 'parent-target', label: 'Target & Reward 🎁', icon: <Gift size={20} /> },
+      { id: 'profile', label: 'User Profile 🏅', icon: <User size={20} /> },
     ];
-  } else if (userMode === 'adult') {
+  } else if (userMode === 'adult' || activeProfile === 'dewasa') {
     menuItems = [
-      { id: 'prayer-guide', label: 'Panduan Sholat', icon: <BookOpen size={20} /> },
-      { id: 'schedule', label: 'Jadwal Sholat', icon: <Clock size={20} /> },
-      { id: 'adult-surah', label: 'Hafalan Surah', icon: <Book size={20} /> },
+      { id: 'prayer-guide', label: 'Panduan Sholat 🧎', icon: <BookOpen size={20} /> },
+      { id: 'adult-quran', label: "Al-Qur'an 30 Juz 📖", icon: <Book size={20} /> },
+      { id: 'adult-schedule', label: 'Jadwal Sholat ⏱️', icon: <Clock size={20} /> },
+      { id: 'adult-kiblat', label: 'Kiblat Sholat 🧭', icon: <Compass size={20} /> },
+      { id: 'adult-dzikir', label: 'Dzikir Fardhu 📿', icon: <CheckSquare size={20} /> },
+      { id: 'profile', label: 'Profil Saya 🏅', icon: <User size={20} /> },
     ];
   } else {
     // 'kids' mode
@@ -40,6 +49,7 @@ export default function AppSidebar({ activePage, setActivePage }) {
       { id: 'hafalan-test', label: 'Tes Hafalan 🧠', icon: <Award size={20} /> },
       { id: 'doa-surah', label: 'Doa & Surah 🤲', icon: <BookOpen size={20} /> },
       { id: 'tracker', label: 'Cek Sholat ✅', icon: <CheckSquare size={20} /> },
+      { id: 'quiz', label: 'Kuis Seru 🎯', icon: <BookOpen size={20} /> },
       { id: 'profile', label: 'Profilku 🏅', icon: <User size={20} /> },
     ];
   }
@@ -48,16 +58,17 @@ export default function AppSidebar({ activePage, setActivePage }) {
     <>
       {/* RESPONSIVE HAMBURGER BUTTON */}
       <button 
-        onClick={() => setSidebarOpen(true)}
+        onClick={() => setSidebarOpen(!sidebarOpen)}
         className={`hamburger-toggle-btn ${isAdultTheme ? "btn btn-ghost" : "clay-btn"}`}
         style={{
-          position: 'fixed', top: '20px', left: '20px',
-          zIndex: 999, width: '54px', height: '54px', borderRadius: isAdultTheme ? '8px' : '50%',
-          display: sidebarOpen ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center',
+          position: 'fixed', top: '16px', left: '16px',
+          zIndex: 999, width: '48px', height: '48px', borderRadius: isAdultTheme ? '8px' : '50%',
+          display: isMobile ? 'flex' : (sidebarOpen ? 'none' : 'flex'),
+          alignItems: 'center', justifyContent: 'center',
           boxShadow: isAdultTheme ? '0 4px 10px rgba(0,0,0,0.1)' : 'var(--shadow-lg)'
         }}
       >
-        <Menu size={24} />
+        <Menu size={22} />
       </button>
 
       {/* SIDEBAR MAIN CONTAINER */}
@@ -87,13 +98,13 @@ export default function AppSidebar({ activePage, setActivePage }) {
               ? '6px 0 0 var(--game-dark)' 
               : '6px 6px 0 var(--game-dark)',
           
-          transform: sidebarOpen ? 'translateX(0)' : 'translateX(-280px)',
+          transform: (isMobile && !sidebarOpen) ? 'translateX(-280px)' : 'translateX(0)',
           transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
         }}
       >
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
           {/* Brand Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', paddingLeft: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', paddingLeft: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ fontSize: '28px' }}>🕌</div>
               <div style={{
@@ -106,7 +117,7 @@ export default function AppSidebar({ activePage, setActivePage }) {
                 SholatKu
               </div>
             </div>
-            {isMobile && sidebarOpen && (
+            {isMobile && (
               <button 
                 onClick={() => setSidebarOpen(false)} 
                 className={isAdultTheme ? "btn btn-ghost" : "clay-btn"}
@@ -122,7 +133,7 @@ export default function AppSidebar({ activePage, setActivePage }) {
           </div>
 
           {/* Menu Items */}
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
             {menuItems.map((item) => {
               const isActive = activePage === item.id;
               return (
@@ -130,101 +141,53 @@ export default function AppSidebar({ activePage, setActivePage }) {
                   key={item.id}
                   onClick={() => handleMenuClick(item.id)}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '12px',
-                    width: '100%', padding: '11px 14px', border: 'none',
-                    borderRadius: isAdultTheme ? '8px' : '16px',
-                    fontSize: '14px',
-                    fontWeight: isAdultTheme ? 700 : 900,
-                    cursor: 'pointer', textAlign: 'left',
-                    backgroundColor: isActive 
-                      ? (isAdultTheme ? '#ECFDF5' : 'var(--mint-bg)') 
-                      : 'transparent',
-                    color: isActive 
-                      ? (isAdultTheme ? '#047857' : 'var(--mint-dark)') 
-                      : '#4A5568',
-                    transition: 'all 0.2s ease'
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px 14px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    fontWeight: 800,
+                    fontSize: '13.5px',
+                    cursor: 'pointer',
+                    backgroundColor: isActive ? (isAdultTheme ? '#ECFDF5' : '#7C3AED') : 'transparent',
+                    color: isActive ? (isAdultTheme ? '#047857' : '#FFFFFF') : '#475569',
+                    textAlign: 'left',
+                    transition: 'all 0.15s ease'
                   }}
                 >
-                  <span style={{ 
-                    color: isActive 
-                      ? (isAdultTheme ? '#047857' : 'var(--mint-dark)') 
-                      : '#A0AEC0',
-                    display: 'flex'
-                  }}>
-                    {item.icon}
-                  </span>
-                  {item.label}
+                  {item.icon}
+                  <span>{item.label}</span>
                 </button>
               );
             })}
           </nav>
-        </div>
 
-        {/* Footer Actions */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          
-          {/* Parent mode actions */}
-          {userMode === 'parent' && (
-            <button
-              className="clay-btn purple"
-              onClick={() => setUserMode('kids')}
-              style={{ fontSize: '13px', gap: '8px', padding: '10px', background: '#059669', borderColor: '#059669', color: '#white', fontWeight: 800 }}
-            >
-              🧒 Masuk Mode Anak
-            </button>
-          )}
-
-          {/* Return to Parent button in Kids Mode */}
-          {userMode === 'kids' && (
-            <button
-              className="clay-btn yellow"
-              onClick={() => setIsPinModalOpen(true)}
-              style={{ fontSize: '13px', gap: '8px', padding: '10px', border: '2px solid #000' }}
-            >
-              <ShieldAlert size={16} />
-              Kembali ke Ortu 👨‍👩‍👦
-            </button>
-          )}
-
-          {/* Quick toggle Adult vs Parent (Only for Parents role) */}
-          {currentUser && currentUser.role === 'parent' && (
-            <button
-              onClick={() => {
-                if (userMode === 'adult') {
-                  setUserMode('parent');
-                } else {
-                  setUserMode('adult');
-                }
-              }}
-              style={{
-                border: 'none', background: 'none', color: '#4A5568', 
-                fontSize: '12px', fontWeight: 800, cursor: 'pointer',
-                textAlign: 'center', padding: '6px', textDecoration: 'underline'
-              }}
-            >
-              {userMode === 'adult' ? '👨‍👩‍👦 Ke Dashboard Orang Tua' : '🧔 Coba Mode Dewasa'}
-            </button>
-          )}
-
-          {/* LOG OUT BUTTON */}
-          <button
-            onClick={() => logout()}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-              width: '100%', padding: '10px', border: '1px solid #CBD5E1',
-              borderRadius: isAdultTheme ? '8px' : '14px',
-              fontSize: '13px', fontWeight: 800, cursor: 'pointer',
-              backgroundColor: '#FFF5F5', color: '#C53030',
-              transition: 'all 0.2s'
-            }}
-          >
-            <LogOut size={14} />
-            Keluar Akun
-          </button>
-
-          {currentUser && currentUser.role === 'parent' && (
-            <div style={{ fontSize: '11px', color: '#64748B', textAlign: 'center', fontWeight: 700 }}>
-              Anak: {currentUser.childName}
+          {/* Account Logout / Session Info */}
+          {currentUser && (
+            <div style={{ paddingTop: '16px', borderTop: '1px solid #E2E8F0' }}>
+              <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748B', marginBottom: '8px' }}>
+                👤 {currentUser.name} ({currentUser.role})
+              </div>
+              <button
+                onClick={() => { logout(); setActivePage('login'); }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  width: '100%',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #FECDD3',
+                  backgroundColor: '#FFF1F2',
+                  color: '#E11D48',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  cursor: 'pointer'
+                }}
+              >
+                <LogOut size={14} /> Keluar
+              </button>
             </div>
           )}
         </div>

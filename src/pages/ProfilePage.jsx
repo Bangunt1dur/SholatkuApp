@@ -1,13 +1,14 @@
 // src/pages/ProfilePage.jsx
+import React from 'react';
 import { useApp } from '../context/AppContext';
 import { ACHIEVEMENTS, SHOLAT_MOVEMENTS } from '../data/data';
-import { Edit2, Award, BookOpen, Star, Gem, Flame, CheckCircle, Award as Trophy } from 'lucide-react';
+import { Edit2, Award as Trophy } from 'lucide-react';
 
-export default function Profile() {
-  const { userMode, profile, setProfile } = useApp();
-  const isKidsMode = userMode === 'kids';
+export default function ProfilePage() {
+  const { userMode, profile, setProfile, isKidsMode } = useApp();
+  const isKids = userMode === 'kids' || isKidsMode;
 
-  const xpPercent = Math.min(100, Math.round((profile?.xp / profile?.xpToNext) * 100)) || 0;
+  const xpPercent = Math.min(100, Math.round(((profile?.xp || 0) / (profile?.xpToNext || 100)) * 100)) || 0;
 
   const handleNameChange = () => {
     const newName = prompt('Masukkan nama baru:', profile?.name);
@@ -16,7 +17,6 @@ export default function Profile() {
     }
   };
 
-  // Build achievement list with earned status
   const achievementList = ACHIEVEMENTS.map((a) => ({
     ...a,
     earned: profile?.earnedBadges?.includes(a.id) || false,
@@ -34,18 +34,18 @@ export default function Profile() {
   }
 
   return (
-    <div className="animate-fadeIn" style={{ padding: '16px', maxWidth: '1100px', margin: '0 auto' }}>
+    <div className="animate-fadeInUp" style={{ padding: '16px', maxWidth: '1100px', margin: '0 auto' }}>
       
       {/* Title Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid rgba(255,255,255,0.3)', paddingBottom: '12px', marginBottom: '24px' }}>
-        <Trophy size={20} style={{ color: isKidsMode ? 'var(--game-dark)' : '#065F46' }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '2px solid #000', paddingBottom: '12px', marginBottom: '24px' }}>
+        <Trophy size={24} style={{ color: isKids ? 'var(--game-purple)' : '#113C2B' }} />
         <h2 style={{ 
-          fontFamily: isKidsMode ? 'var(--font-headline)' : 'Playfair Display, serif', 
+          fontFamily: isKids ? 'var(--font-headline)' : 'Playfair Display, serif', 
           fontSize: '24px', fontWeight: 900, 
-          color: 'var(--game-dark)', 
+          color: '#113C2B', 
           margin: 0 
         }}>
-          {isKidsMode ? 'Profil Ku 🌟' : 'Profil Saya'}
+          {isKids ? 'Profil Ku 🌟' : 'Profil Saya'}
         </h2>
       </div>
 
@@ -53,36 +53,36 @@ export default function Profile() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', alignItems: 'start' }}>
         
         {/* BENTO BLOCK 1: Identity & XP Ring */}
-        <div className="clay-card" style={{ textAlign: 'center', padding: '24px', background: '#fff' }}>
+        <div className="card" style={{ textAlign: 'center', padding: '24px', background: '#fff', borderRadius: '24px', border: '4px solid #000', boxShadow: '6px 6px 0px #000' }}>
           
           <div style={{ 
             width: '96px', height: '96px', borderRadius: '50%', 
-            background: 'linear-gradient(135deg, var(--game-purple) 0%, var(--game-purple-dark) 100%)', 
+            background: isKids ? 'linear-gradient(135deg, var(--game-purple) 0%, var(--game-purple-dark) 100%)' : 'linear-gradient(135deg, #113C2B, #082218)', 
             display: 'flex', alignItems: 'center', justifyContent: 'center', 
-            fontSize: '44px', margin: '0 auto 16px', border: '3px solid var(--game-dark)', 
-            boxShadow: '4px 4px 0 var(--game-dark)', position: 'relative'
+            fontSize: '44px', margin: '0 auto 16px', border: '3px solid #000', 
+            boxShadow: '4px 4px 0 #000', position: 'relative'
           }}>
-            {isKidsMode ? '🧒' : '👤'}
+            {isKids ? '🧒' : '👤'}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px' }}>
-            <h3 style={{ fontFamily: 'var(--font-headline)', fontSize: '20px', fontWeight: 950, color: 'var(--game-dark)', margin: 0 }}>
+            <h3 style={{ fontFamily: 'var(--font-headline)', fontSize: '22px', fontWeight: 950, color: '#113C2B', margin: 0 }}>
               {profile.name}
             </h3>
             <button 
               onClick={handleNameChange} 
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#64748B' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#113C2B' }}
             >
-              <Edit2 size={14} />
+              <Edit2 size={16} />
             </button>
           </div>
 
           <span style={{ 
             display: 'inline-block', background: 'var(--game-yellow)', color: 'var(--game-dark)', 
-            border: '2.5px solid var(--game-dark)', padding: '4px 14px', borderRadius: '99px', 
-            fontSize: '12px', fontWeight: 900, boxShadow: '2px 2px 0 var(--game-dark)', marginBottom: '20px'
+            border: '2.5px solid #000', padding: '4px 14px', borderRadius: '99px', 
+            fontSize: '12px', fontWeight: 900, boxShadow: '2px 2px 0 #000', marginBottom: '20px'
           }}>
-            🗺️ Level {profile.level} Explorer
+            🗺️ Level {profile.level || 1} Explorer
           </span>
 
           {/* Circular SVG Level Progress Tracker */}
@@ -91,7 +91,7 @@ export default function Profile() {
               <circle cx="50" cy="50" r="42" fill="none" stroke="#F1F5F9" strokeWidth="6" />
               <circle
                 cx="50" cy="50" r="42" fill="none"
-                stroke="var(--game-purple)" strokeWidth="6"
+                stroke={isKids ? "var(--game-purple)" : "#113C2B"} strokeWidth="6"
                 strokeDasharray={`${2 * Math.PI * 42}`}
                 strokeDashoffset={`${2 * Math.PI * 42 * (1 - xpPercent / 100)}`}
                 strokeLinecap="round"
@@ -100,47 +100,42 @@ export default function Profile() {
               />
             </svg>
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ fontWeight: 950, fontSize: '24px', color: 'var(--game-dark)', lineHeight: 1 }}>{profile.level}</div>
+              <div style={{ fontWeight: 950, fontSize: '24px', color: '#113C2B', lineHeight: 1 }}>{profile.level || 1}</div>
               <div style={{ fontSize: '9px', fontWeight: 900, color: '#64748B' }}>LEVEL</div>
             </div>
           </div>
 
           <div style={{ fontSize: '12px', fontWeight: 800, color: '#64748B' }}>
-            {profile.xp} / {profile.xpToNext} XP
+            {profile.xp || 0} / {profile.xpToNext || 100} XP
           </div>
           
           <div style={{ 
             marginTop: '8px', height: '16px', background: '#F1F5F9', borderRadius: '10px', 
-            overflow: 'hidden', border: '2.5px solid var(--game-dark)', padding: '2px' 
+            overflow: 'hidden', border: '2.5px solid #000', padding: '2px' 
           }}>
-            <div style={{ height: '100%', width: `${xpPercent}%`, background: 'var(--game-green-light)', borderRadius: '6px', borderRight: '1.5px solid var(--game-dark)', transition: 'width 0.4s' }} />
+            <div style={{ height: '100%', width: `${xpPercent}%`, background: 'var(--game-green-light)', borderRadius: '6px', transition: 'width 0.4s' }} />
           </div>
-          
-          <p style={{ margin: '8px 0 0', fontSize: '11px', fontWeight: 700, fontStyle: 'italic', color: '#94A3B8' }}>
-            Butuh {profile.xpToNext - profile.xp} XP lagi untuk naik ke Level {profile.level + 1}!
-          </p>
         </div>
 
         {/* BENTO BLOCK 2: 6 Stats Grid Badges */}
-        <div className="clay-card" style={{ padding: '24px', background: '#fff' }}>
-          <h4 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 900, color: 'var(--game-dark)' }}>
+        <div className="card" style={{ padding: '24px', background: '#fff', borderRadius: '24px', border: '4px solid #000', boxShadow: '6px 6px 0px #000' }}>
+          <h4 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 900, color: '#113C2B' }}>
             📊 Statistik Pencapaian Belajar
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
             {[
-              { icon: '⭐', val: profile.stars, label: 'Bintang', color: '#B45309', bg: '#FEF3C7' },
-              { icon: '💎', val: profile.gems, label: 'Gems', color: '#6D28D9', bg: '#F5F3FF' },
-              { icon: '🔥', val: profile.streak, label: 'Hari Streak', color: '#B91C1C', bg: '#FEF2F2' },
+              { icon: '⭐', val: profile.stars || 0, label: 'Bintang', color: '#B45309', bg: '#FEF3C7' },
+              { icon: '💎', val: profile.gems || 0, label: 'Gems', color: '#6D28D9', bg: '#F5F3FF' },
+              { icon: '🔥', val: profile.streak || 0, label: 'Hari Streak', color: '#B91C1C', bg: '#FEF2F2' },
               { icon: '🏅', val: earnedCount, label: 'Badge Diraih', color: '#047857', bg: '#ECFDF5' },
               { icon: '📖', val: completedMovements, label: 'Gerakan Selesai', color: '#1D4ED8', bg: '#EFF6FF' },
-              { icon: '🧠', val: profile.quizCorrect, label: 'Kuis Benar', color: '#BE185D', bg: '#FDF2F8' },
+              { icon: '🧠', val: profile.quizCorrect || 0, label: 'Kuis Benar', color: '#BE185D', bg: '#FDF2F8' },
             ].map((s) => (
               <div 
                 key={s.label} 
-                className="clay-card"
                 style={{ 
                   textAlign: 'center', padding: '12px', background: s.bg,
-                  border: '2.5px solid var(--game-dark)', boxShadow: '2px 2px 0 var(--game-dark)',
+                  borderRadius: '16px', border: '2.5px solid #000', boxShadow: '2px 2px 0 #000',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
                 }}
               >
@@ -152,103 +147,46 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* BENTO BLOCK 3: Achievement Badges Collection */}
-        <div className="clay-card" style={{ padding: '24px', background: '#fff' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: 'var(--game-dark)' }}>
-              🏆 Lencana Penghargaan
-            </h4>
-            <span style={{
-              background: 'var(--game-purple)', color: '#fff', border: '2px solid var(--game-dark)',
-              padding: '2px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: 900,
-              boxShadow: '2px 2px 0 var(--game-dark)'
-            }}>
-              {earnedCount}/{achievementList.length}
-            </span>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '12px' }}>
-            {achievementList.map((a) => (
-              <div
-                key={a.id}
-                title={a.desc}
-                className="clay-card"
-                style={{
-                  textAlign: 'center', padding: '8px',
-                  border: '2.5px solid var(--game-dark)',
-                  boxShadow: a.earned ? '3px 3px 0 var(--game-dark)' : 'none',
-                  background: a.earned ? 'var(--game-green-light)' : '#F1F5F9',
-                  opacity: a.earned ? 1 : 0.5,
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px'
-                }}
-              >
-                <div style={{ fontSize: '24px' }}>{a.emoji}</div>
-                <div style={{ 
-                  fontSize: '9px', fontWeight: 900, color: 'var(--game-dark)', 
-                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' 
-                }}>
-                  {isKidsMode ? a.nameKids : a.name}
-                </div>
-                {a.earned && (
-                  <span style={{ fontSize: '7.5px', fontWeight: 900, color: '#047857', textTransform: 'uppercase' }}>
-                    Dapat!
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* BENTO BLOCK 4: Gerakan Sholat Checklist Progress */}
-        <div className="clay-card" style={{ padding: '24px', background: '#fff', gridColumn: 'span 1', lgGridColumn: 'span 2' }}>
-          <h4 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 900, color: 'var(--game-dark)' }}>
-            📖 Daftar Penguasaan Gerakan Sholat ({completedMovements}/{SHOLAT_MOVEMENTS.length})
-          </h4>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
-            {SHOLAT_MOVEMENTS.map((m) => {
-              const done = profile.completedMovements?.includes(m.key) || false;
-              return (
-                <div 
-                  key={m.key} 
-                  style={{ 
-                    display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', 
-                    borderRadius: '12px', border: '2px solid var(--game-dark)',
-                    background: done ? 'rgba(111, 255, 157, 0.15)' : '#F8FAFC',
-                    boxShadow: done ? '2px 2px 0 var(--game-dark)' : 'none'
-                  }}
-                >
-                  <div style={{
-                    width: '20px', height: '20px', borderRadius: '50%',
-                    border: '2px solid var(--game-dark)',
-                    background: done ? 'var(--game-green-light)' : '#fff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                  }}>
-                    {done && <CheckCircle size={12} style={{ color: 'var(--game-dark)' }} />}
-                  </div>
-                  <span style={{ 
-                    fontSize: '12.5px', fontWeight: 800, 
-                    color: done ? 'var(--game-dark)' : '#64748B',
-                    textDecoration: done ? 'none' : 'none' 
-                  }}>
-                    {isKidsMode ? m.nameKids : m.name}
-                  </span>
-                  {done && (
-                    <span style={{ 
-                      marginLeft: 'auto', fontSize: '9px', fontWeight: 900, 
-                      color: '#047857', border: '1px solid #047857', 
-                      background: '#ECFDF5', padding: '2px 6px', borderRadius: '4px' 
-                    }}>
-                      Selesai
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
       </div>
+
+      {/* BENTO BLOCK 3: Achievement Badges Collection */}
+      <div className="card" style={{ marginTop: '24px', padding: '24px', background: '#fff', borderRadius: '24px', border: '4px solid #000', boxShadow: '6px 6px 0px #000' }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: '18px', fontWeight: 900, color: '#113C2B', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          🏅 Koleksi Badge Pencapaian ({earnedCount}/{achievementList.length})
+        </h3>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+          {achievementList.map((a) => (
+            <div
+              key={a.id}
+              style={{
+                padding: '14px',
+                borderRadius: '16px',
+                border: '2.5px solid #000',
+                backgroundColor: a.earned ? '#ECFDF5' : '#F8FAFC',
+                boxShadow: a.earned ? '3px 3px 0 #000' : 'none',
+                opacity: a.earned ? 1 : 0.6,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}
+            >
+              <div style={{ fontSize: '32px', filter: a.earned ? 'none' : 'grayscale(100%)' }}>
+                {a.icon || '🏆'}
+              </div>
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 900, color: a.earned ? '#047857' : '#475569' }}>
+                  {a.title}
+                </div>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', marginTop: '2px' }}>
+                  {a.description}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 }

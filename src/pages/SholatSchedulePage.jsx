@@ -102,13 +102,12 @@ function useCountdown(targetTime) {
 const PRAYER_KEYS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 const PRAYER_MAP = { Fajr: 0, Dhuhr: 1, Asr: 2, Maghrib: 3, Isha: 4 };
 
-export default function Schedule() {
-  const { userMode, tracker } = useApp();
+export default function SholatSchedulePage() {
+  const { userMode, isKidsMode } = useApp();
   const { times, location, loading, error, fetchByGeo, fetchByCity } = usePrayerTimes();
   const [inputCity, setInputCity] = useState('Jakarta');
 
-  const isKidsMode = userMode === 'kids';
-  const isAdultTheme = userMode === 'adult';
+  const isKids = userMode === 'kids' || isKidsMode;
 
   useEffect(() => { fetchByGeo(); }, []);
 
@@ -133,201 +132,162 @@ export default function Schedule() {
   };
 
   return (
-    <div className="animate-fadeIn">
-      {/* Title */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #E2E8F0', paddingBottom: '12px', marginBottom: '24px' }}>
-        <Clock size={20} style={{ color: isAdultTheme ? '#065F46' : 'var(--game-purple)' }} />
-        <h2 style={{ 
-          fontFamily: isAdultTheme ? 'Playfair Display, serif' : 'var(--font-headline)', 
-          fontSize: '24px', fontWeight: 700, 
-          color: isAdultTheme ? '#0F172A' : 'var(--game-dark)', 
-          margin: 0 
-        }}>
-          {isKidsMode ? 'Waktu Sholat Hari Ini ⏰' : 'Jadwal Sholat Fardhu'}
-        </h2>
+    <div className="animate-fadeInUp" style={{ padding: '16px', maxWidth: '1000px', margin: '0 auto', color: '#113C2B' }}>
+      
+      {/* Title Header */}
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '12px', 
+        fontSize: '24px', 
+        fontWeight: 900, 
+        marginBottom: '24px',
+        backgroundColor: '#D4DDD3',
+        border: '3px solid #113C2B',
+        padding: '10px 20px',
+        borderRadius: '16px',
+        boxShadow: '4px 4px 0px #113C2B',
+        width: 'fit-content'
+      }}>
+        <Clock size={20} strokeWidth={2.5} />
+        <div>{isKids ? 'Waktu Sholat Hari Ini ⏰' : 'Jadwal Sholat Fardhu'}</div>
       </div>
 
       {/* Location Bar */}
-      <div 
-        className={isAdultTheme ? "" : "card mb-4"} 
-        style={{ 
-          display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
-          padding: '16px', background: '#fff', border: isAdultTheme ? '1px solid #E2E8F0' : '2px solid #000',
-          borderRadius: isAdultTheme ? '8px' : '16px', marginBottom: '20px'
-        }}
-      >
-        <MapPin size={18} style={{ color: isAdultTheme ? '#059669' : 'var(--primary)', flexShrink: 0 }} />
+      <div style={{ 
+        display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+        padding: '16px 20px', background: '#fff', border: '3px solid #113C2B',
+        borderRadius: '16px', boxShadow: '4px 4px 0px #113C2B', marginBottom: '20px'
+      }}>
+        <MapPin size={22} style={{ color: '#113C2B', flexShrink: 0 }} />
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: 14 }}>
+          <div style={{ fontWeight: 900, color: '#113C2B', fontSize: '15px' }}>
             {location || 'Mendeteksi lokasi Anda...'}
           </div>
-          <div style={{ fontSize: 11.5, color: 'var(--text-muted)', fontWeight: 700 }}>
-            {new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          <div style={{ fontSize: '12px', color: '#556B52', fontWeight: 700 }}>
+            Metode: Kemenag RI / Al-Adhan Method 11
           </div>
         </div>
-        <button 
-          className={isAdultTheme ? "btn btn-ghost btn-sm" : "btn btn-ghost btn-sm"} 
-          onClick={fetchByGeo} 
-          disabled={loading}
-          style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+
+        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            placeholder="Cari Kota (mis. Surabaya)..."
+            value={inputCity}
+            onChange={(e) => setInputCity(e.target.value)}
+            style={{
+              padding: '8px 12px', borderRadius: '10px', border: '2px solid #113C2B',
+              fontSize: '13px', fontWeight: 700, outline: 'none', background: '#F8FAF8', color: '#113C2B'
+            }}
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              padding: '8px 14px', borderRadius: '10px', border: '2px solid #113C2B',
+              backgroundColor: '#113C2B', color: '#fff', fontSize: '13px', fontWeight: 900,
+              cursor: 'pointer', boxShadow: '2px 2px 0px #082218'
+            }}
+          >
+            {loading ? 'Cari...' : 'Cari'}
+          </button>
+        </form>
+
+        <button
+          onClick={fetchByGeo}
+          style={{
+            padding: '8px', borderRadius: '10px', border: '2px solid #113C2B',
+            backgroundColor: '#D4DDD3', color: '#113C2B', cursor: 'pointer', display: 'flex', alignItems: 'center'
+          }}
+          title="Gunakan Lokasi GPS Saya"
         >
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-          {loading ? 'Memuat...' : 'Perbarui GPS'}
+          <RefreshCw size={16} />
         </button>
       </div>
 
-      {/* City Search */}
-      <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-        <input
-          type="text"
-          value={inputCity}
-          onChange={e => setInputCity(e.target.value)}
-          placeholder="Cari jadwal kota lain (Contoh: Bandung)..."
-          style={{ 
-            flex: 1, padding: '10px 16px', 
-            borderRadius: isAdultTheme ? '8px' : 'var(--radius-full)', 
-            border: isAdultTheme ? '1px solid #CBD5E0' : '2px solid #000', 
-            fontFamily: 'Inter, sans-serif', fontSize: 13.5, fontWeight: 700, outline: 'none', background: '#fff' 
-          }}
-        />
-        <button 
-          type="submit" 
-          className={isAdultTheme ? "btn btn-primary" : "clay-btn purple btn-sm"}
-          style={{ padding: '8px 20px', fontSize: '13px' }}
-        >
-          Cari
-        </button>
-      </form>
+      {/* Countdown Card for Next Prayer */}
+      {nextInfo && (
+        <div style={{
+          background: 'linear-gradient(135deg, #113C2B 0%, #082218 100%)',
+          color: '#ffffff',
+          borderRadius: '24px',
+          padding: '24px',
+          border: '4px solid #000',
+          boxShadow: '6px 6px 0px #000',
+          marginBottom: '24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}>
+          <div>
+            <span style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.8 }}>
+              SHOLAT SELANJUTNYA
+            </span>
+            <h2 style={{ fontSize: '32px', fontWeight: 900, margin: '4px 0 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {nextInfo.emoji} Sholat {nextInfo.name} ({nextTime})
+            </h2>
+          </div>
 
-      {error && (
-        <div style={{ background: '#FFF5F5', borderRadius: '10px', padding: '10px 16px', color: '#C53030', fontWeight: 800, fontSize: 13, marginBottom: 14, border: '2px solid #FEB2B2' }}>
-          ⚠️ {error}
+          <div style={{ textAlign: 'right' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.8 }}>
+              MENUNJU ADZAN
+            </span>
+            <div style={{ fontSize: '36px', fontWeight: 900, fontFamily: 'monospace', letterSpacing: '2px' }}>
+              {countdown || '--:--:--'}
+            </div>
+          </div>
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', alignItems: 'start' }}>
-        
-        {/* Prayer Time List */}
-        <div 
-          className={isAdultTheme ? "" : "card"}
-          style={{
-            background: '#fff', padding: '20px', border: isAdultTheme ? '1px solid #E2E8F0' : '2.5px solid #000',
-            borderRadius: isAdultTheme ? '10px' : '16px'
-          }}
-        >
-          <div style={{ fontWeight: 900, color: 'var(--text-dark)', fontSize: 14, marginBottom: 14 }}>
-            🕐 Waktu Sholat Fardhu:
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {PRAYER_NAMES.map((p) => {
-              const apiKey = { fajr: 'Fajr', dhuhr: 'Dhuhr', asr: 'Asr', maghrib: 'Maghrib', isha: 'Isha' }[p.key];
-              const timeStr = times?.[apiKey];
-              const [h, m] = timeStr ? timeStr.split(':').map(Number) : [0, 0];
-              const isPassed = timeStr && h * 60 + m < nowMinutes;
-              const isNext = apiKey === nextPrayerKey;
-              const isDone = tracker && tracker[p.key];
+      {/* Prayer Schedule Cards */}
+      {times ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+          {PRAYER_KEYS.map((k) => {
+            const info = PRAYER_NAMES[PRAYER_MAP[k]];
+            const isNext = k === nextPrayerKey;
+            const timeVal = times[k];
 
-              return (
-                <div
-                  key={p.key}
-                  className={`prayer-time-row ${isNext ? 'next' : ''} ${isPassed && !isNext ? 'passed' : ''}`}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '12px 16px', borderRadius: isAdultTheme ? '8px' : '12px',
-                    border: isNext 
-                      ? `2px solid ${isAdultTheme ? '#059669' : 'var(--primary)'}` 
-                      : `1px solid ${isAdultTheme ? '#E2E8F0' : '#000'}`,
-                    background: isNext 
-                      ? (isAdultTheme ? '#ECFDF5' : 'var(--primary-light)') 
-                      : '#fff',
-                    opacity: isPassed && !isNext ? 0.6 : 1
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 22 }}>{p.emoji}</span>
-                    <div>
-                      <div style={{ fontWeight: 900, fontSize: 14, color: 'var(--text-dark)' }}>
-                        {isKidsMode ? (p.labelKids || p.label) : p.label}
-                      </div>
-                      {isNext && <div style={{ fontSize: 11, color: isAdultTheme ? '#059669' : 'var(--primary)', fontWeight: 800 }}>Berikutnya ⏰</div>}
-                      {isPassed && !isNext && <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700 }}>Sudah lewat</div>}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {isDone && <span style={{ color: 'var(--game-green)', fontWeight: 900 }}>✓</span>}
-                    <span style={{ 
-                      fontWeight: 900, fontSize: 16, 
-                      color: isNext ? (isAdultTheme ? '#047857' : 'var(--primary-dark)') : 'var(--text-dark)', 
-                      fontVariantNumeric: 'tabular-nums' 
-                    }}>
-                      {loading ? '...' : timeStr || '--:--'}
-                    </span>
-                  </div>
+            return (
+              <div
+                key={k}
+                style={{
+                  background: isNext ? '#D4DDD3' : '#FFFFFF',
+                  border: isNext ? '4px solid #113C2B' : '3px solid #113C2B',
+                  borderRadius: '20px',
+                  padding: '20px',
+                  boxShadow: isNext ? '6px 6px 0px #113C2B' : '4px 4px 0px #113C2B',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  transition: 'transform 0.15s ease'
+                }}
+              >
+                <div style={{ fontSize: '32px' }}>{info.emoji}</div>
+                <div style={{ fontWeight: 900, fontSize: '18px', color: '#113C2B' }}>
+                  {info.name}
                 </div>
-              );
-            })}
-          </div>
+                <div style={{ fontWeight: 900, fontSize: '24px', color: isNext ? '#113C2B' : '#059669' }}>
+                  {timeVal}
+                </div>
+                {isNext && (
+                  <span style={{
+                    fontSize: '11px', fontWeight: 900, color: '#FFFFFF', backgroundColor: '#113C2B',
+                    padding: '4px 10px', borderRadius: '8px', width: 'fit-content'
+                  }}>
+                    Berikutnya ⏳
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
-
-        {/* Next Prayer Countdown Card */}
-        <div>
-          {nextInfo && (
-            <div 
-              className={isAdultTheme ? "" : "card mb-4"} 
-              style={{ 
-                background: isAdultTheme ? '#fff' : 'linear-gradient(135deg, var(--primary-dark), var(--primary))', 
-                color: isAdultTheme ? '#0F172A' : 'white', 
-                border: isAdultTheme ? '1px solid #E2E8F0' : 'none', 
-                textAlign: 'center',
-                padding: '24px', borderRadius: isAdultTheme ? '10px' : '16px',
-                boxShadow: isAdultTheme ? '0 1px 3px rgba(0,0,0,0.05)' : 'none'
-              }}
-            >
-              <div style={{ fontSize: '11px', fontWeight: 800, opacity: 0.8, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
-                Sholat Berikutnya
-              </div>
-              <div style={{ fontSize: 36, marginBottom: 4 }}>{nextInfo.emoji}</div>
-              <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 4, color: isAdultTheme ? '#065F46' : '#white' }}>
-                {isKidsMode ? (nextInfo.labelKids || nextInfo.label) : nextInfo.label}
-              </div>
-              <div style={{ fontSize: 13, opacity: 0.8, fontWeight: 700, marginBottom: 12 }}>
-                Pukul {nextTime || '--:--'}
-              </div>
-              <div style={{ 
-                fontSize: 48, fontWeight: 900, letterSpacing: -2, lineHeight: 1,
-                color: isAdultTheme ? '#059669' : 'white'
-              }}>
-                {countdown || '--:--:--'}
-              </div>
-              <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 700, marginTop: 10 }}>
-                Hitung mundur menuju waktu sholat selanjutnya.
-              </div>
-            </div>
-          )}
-
-          {/* Sunrise / Sunset times */}
-          <div 
-            className={isAdultTheme ? "" : "card mt-4"}
-            style={{
-              background: '#fff', padding: '16px', border: isAdultTheme ? '1px solid #E2E8F0' : '2px solid #000',
-              borderRadius: isAdultTheme ? '10px' : '16px'
-            }}
-          >
-            <div style={{ fontWeight: 900, color: 'var(--text-dark)', fontSize: 14, marginBottom: 10 }}>⏰ Waktu Tambahan</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {['Sunrise', 'Imsak', 'Midnight'].map((k) => (
-                times?.[k] && (
-                  <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #E2E8F0', fontSize: 13 }}>
-                    <span style={{ fontWeight: 700, color: '#64748B' }}>{k}</span>
-                    <span style={{ fontWeight: 900, color: '#1E293B', fontVariantNumeric: 'tabular-nums' }}>{times[k]}</span>
-                  </div>
-                )
-              ))}
-            </div>
-          </div>
-
+      ) : (
+        <div style={{ textAlign: 'center', padding: '40px', fontWeight: 800 }}>
+          {error ? `⚠️ ${error}` : 'Memuat jadwal sholat...'}
         </div>
-      </div>
+      )}
     </div>
   );
 }

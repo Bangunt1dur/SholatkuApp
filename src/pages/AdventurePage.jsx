@@ -3,18 +3,18 @@ import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { SHOLAT_MOVEMENTS } from '../data/data';
 import TreasureBox from '../components/UI/TreasureBox';
-import { Lock, CheckCircle, Star, Sparkles, BookOpen } from 'lucide-react';
+import { Lock, CheckCircle, Star, Sparkles } from 'lucide-react';
 
-export default function Adventure() {
-  const { userMode, profile, completeMovement } = useApp();
-  const isKidsMode = userMode === 'kids';
+export default function AdventurePage() {
+  const { userMode, profile, completeMovement, isKidsMode } = useApp();
+  const isKids = userMode === 'kids' || isKidsMode;
   const [selectedNode, setSelectedNode] = useState(0);
   const [showTreasure, setShowTreasure] = useState(false);
 
   const completedCount = profile?.completedMovements?.length || 0;
 
   const handleNodeClick = (idx) => {
-    if (idx > completedCount) return; // locked
+    if (idx > completedCount) return;
     setSelectedNode(idx);
   };
 
@@ -35,19 +35,19 @@ export default function Adventure() {
         <TreasureBox
           onClose={() => setShowTreasure(false)}
           rewards={{ xp: 50, stars: 3, gems: 1 }}
-          title={isKidsMode ? 'Level Selesai! 🎉' : 'Gerakan Dikuasai!'}
+          title={isKids ? 'Level Selesai! 🎉' : 'Gerakan Dikuasai!'}
         />
       )}
 
       {/* Progress Stats Card */}
       <div className="clay-card mb-4" style={{ 
         background: 'linear-gradient(135deg, var(--game-purple) 0%, var(--game-purple-dark) 100%)', 
-        color: 'white', border: '3px solid var(--game-dark)', padding: '20px'
+        color: 'white', border: '3px solid var(--game-dark)', padding: '20px', borderRadius: '24px'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.8 }}>
-              {isKidsMode ? '🗺️ Progress Petualangan Sholat' : 'Adventure Progress'}
+              {isKids ? '🗺️ Progress Petualangan Sholat' : 'Adventure Progress'}
             </div>
             <div style={{ fontSize: '28px', fontWeight: 900, margin: '4px 0', fontFamily: 'var(--font-headline)' }}>
               {completedCount} <span style={{ fontSize: '15px', fontWeight: 700, opacity: 0.8 }}>dari {SHOLAT_MOVEMENTS.length} Gerakan Selesai</span>
@@ -83,11 +83,10 @@ export default function Adventure() {
         </div>
       </div>
 
-      {/* Main Grid: Figma Doa Collection style */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
         
-        {/* Figma Stepper Path Card */}
-        <div className="clay-card" style={{ padding: '24px', background: '#fff' }}>
+        {/* Stepper Path Card */}
+        <div className="clay-card" style={{ padding: '24px', background: '#fff', borderRadius: '24px', border: '4px solid #000', boxShadow: '4px 4px 0px #000' }}>
           <h3 style={{ 
             fontFamily: 'var(--font-headline)', fontWeight: 900, fontSize: '18px', 
             color: 'var(--game-dark)', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '8px' 
@@ -95,7 +94,6 @@ export default function Adventure() {
             🗺️ Jalur Belajar Sholat Kita!
           </h3>
 
-          {/* Scrollable Horizontal Stepper Track */}
           <div style={{ 
             overflowX: 'auto', padding: '16px 8px', display: 'flex', gap: '16px', 
             alignItems: 'center', position: 'relative', border: '2px solid #E2E8F0', 
@@ -107,9 +105,7 @@ export default function Adventure() {
               const isLocked = i > completedCount;
               const isSelected = i === selectedNode;
 
-              // Node Background colors
               let bg = '#E2E8F0';
-              let borderCol = 'var(--game-dark)';
               let color = '#718096';
 
               if (isCompleted) {
@@ -133,7 +129,6 @@ export default function Adventure() {
                       position: 'relative'
                     }}
                   >
-                    {/* Circle Node */}
                     <div style={{
                       width: '64px', height: '64px', borderRadius: '50%',
                       border: isSelected ? '4px solid var(--game-purple)' : '3px solid var(--game-dark)',
@@ -146,17 +141,15 @@ export default function Adventure() {
                       {isCompleted ? '✓' : isLocked ? <Lock size={20} style={{ color: '#94A3B8' }} /> : m.emoji}
                     </div>
 
-                    {/* Step tag name */}
                     <span style={{ 
                       fontSize: '11px', fontWeight: 800, 
                       color: isSelected ? 'var(--game-purple)' : 'var(--game-dark)',
                       maxWidth: '80px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
                     }}>
-                      {m.nameKids.split(' ')[0]}
+                      {m.nameKids ? m.nameKids.split(' ')[0] : m.name}
                     </span>
                   </div>
 
-                  {/* Connecting Line Track */}
                   {i < SHOLAT_MOVEMENTS.length - 1 && (
                     <div style={{
                       width: '40px', height: '6px',
@@ -175,9 +168,8 @@ export default function Adventure() {
         {currentMovement && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
             
-            {/* Left: Illustration Card */}
             <div className="clay-card" style={{ 
-              background: '#fff', border: '3px solid var(--game-dark)', padding: '24px',
+              background: '#fff', border: '3px solid var(--game-dark)', padding: '24px', borderRadius: '24px',
               display: 'flex', flexDirection: 'column', justifyItems: 'center', alignItems: 'center', textAlign: 'center'
             }}>
               <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--game-purple)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -198,21 +190,19 @@ export default function Adventure() {
               </div>
 
               <h3 style={{ fontFamily: 'var(--font-headline)', fontWeight: 950, fontSize: '22px', color: 'var(--game-dark)', margin: '0 0 4px' }}>
-                {currentMovement.nameKids}
+                {currentMovement.nameKids || currentMovement.name}
               </h3>
               <p style={{ fontSize: '11px', color: '#64748B', fontWeight: 700, margin: 0 }}>
                 Rujukan: HPT Muhammadiyah
               </p>
             </div>
 
-            {/* Right: Reading & Action Card */}
-            <div className="clay-card" style={{ background: '#fff', border: '3px solid var(--game-dark)', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div className="clay-card" style={{ background: '#fff', border: '3px solid var(--game-dark)', padding: '24px', borderRadius: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
                 <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--game-purple)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
                   📖 Lafal Doa Gerakan
                 </span>
 
-                {/* Arabic */}
                 {currentMovement.arabicText ? (
                   <div style={{ background: '#FAF9F6', border: '2px solid var(--game-dark)', borderRadius: '12px', padding: '12px 16px', marginBottom: '12px', boxShadow: '3px 3px 0 var(--game-dark)' }}>
                     <div style={{ fontSize: '20px', textAlign: 'right', fontWeight: 600, direction: 'rtl', fontFamily: 'serif', lineHeight: '2.0', color: '#0F172A' }}>
@@ -225,25 +215,22 @@ export default function Adventure() {
                   </div>
                 )}
 
-                {/* Latin */}
                 {currentMovement.latin && (
                   <p style={{ margin: '0 0 10px', fontSize: '12.5px', fontWeight: 700, fontStyle: 'italic', color: '#334155' }}>
                     "{currentMovement.latin}"
                   </p>
                 )}
 
-                {/* Explanation */}
                 <div style={{ background: 'rgba(255, 209, 102, 0.1)', border: '2px solid #FFE8A3', borderRadius: '10px', padding: '12px', marginTop: '12px' }}>
                   <span style={{ fontSize: '10px', fontWeight: 800, color: '#B45309', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>
                     💡 Cara Gerakannya:
                   </span>
                   <p style={{ margin: 0, fontSize: '12.5px', fontWeight: 700, color: '#1E293B', lineHeight: 1.5 }}>
-                    {currentMovement.explanationKids}
+                    {currentMovement.explanationKids || currentMovement.explanation}
                   </p>
                 </div>
               </div>
 
-              {/* Complete Level Button */}
               <div style={{ marginTop: '20px' }}>
                 {(() => {
                   const isCompleted = profile?.completedMovements?.includes(currentMovement.key) || false;
@@ -252,7 +239,7 @@ export default function Adventure() {
                       onClick={() => handleCompleteLevel(currentMovement)}
                       disabled={isCompleted}
                       className={isCompleted ? "clay-btn w-full" : "clay-btn yellow w-full"}
-                      style={{ padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: isCompleted ? 0.6 : 1 }}
+                      style={{ padding: '14px', borderRadius: '14px', border: '3px solid #000', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: isCompleted ? 0.6 : 1, cursor: isCompleted ? 'default' : 'pointer' }}
                     >
                       {isCompleted ? (
                         <>
@@ -274,8 +261,8 @@ export default function Adventure() {
           </div>
         )}
 
-        {/* Figma Doa List Grid style below */}
-        <div className="clay-card" style={{ padding: '24px', background: '#fff' }}>
+        {/* List of Movements */}
+        <div className="clay-card" style={{ padding: '24px', background: '#fff', borderRadius: '24px', border: '4px solid #000', boxShadow: '4px 4px 0px #000' }}>
           <h3 style={{ 
             fontFamily: 'var(--font-headline)', fontWeight: 900, fontSize: '18px', 
             color: 'var(--game-dark)', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '8px' 
@@ -318,7 +305,6 @@ export default function Adventure() {
                     transition: 'all 0.15s'
                   }}
                 >
-                  {/* Emoji */}
                   <span style={{ fontSize: '32px' }}>{isLocked ? '🔒' : m.emoji}</span>
                   
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -326,7 +312,7 @@ export default function Adventure() {
                       fontWeight: 900, fontSize: '13.5px', color: 'var(--game-dark)', 
                       whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' 
                     }}>
-                      {m.nameKids}
+                      {m.nameKids || m.name}
                     </div>
                     <span style={{
                       display: 'inline-block', fontSize: '10px', fontWeight: 800, marginTop: '4px',

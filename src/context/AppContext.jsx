@@ -22,10 +22,64 @@ const saveToStorage = (key, value) => {
 
 const getTodayDateString = () => new Date().toISOString().split('T')[0];
 
-// Default Admin account
 const DEFAULT_USERS = [
   { id: 'admin-user', role: 'admin', email: 'admin@sholatku.com', name: 'System Admin', username: 'admin', password: 'admin123' }
 ];
+
+const DEFAULT_TRACKER = {
+  date: getTodayDateString(),
+  fajr: false,
+  dhuhr: false,
+  asr: false,
+  maghrib: false,
+  isha: false,
+};
+
+const DEFAULT_PROFILE = {
+  name: 'Adit',
+  level: 1,
+  xp: 0,
+  xpToNext: 100,
+  gems: 5,
+  stars: 0,
+  completedMovements: [],
+  quizCorrect: 0,
+  dailyComplete: 0,
+  streak: 0,
+  longestStreak: 0,
+  subuhDone: false,
+  earnedBadges: [],
+  totalPrayers: 0,
+  streakHistory: []
+};
+
+const generateMockHistory = () => {
+  const history = [];
+  const details = {};
+  const today = new Date();
+  
+  for (let i = 30; i > 0; i--) {
+    const d = new Date();
+    d.setDate(today.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    
+    const count = Math.floor(Math.random() * 3) + 3;
+    history.push({ date: dateStr, count });
+    
+    const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+    details[dateStr] = {};
+    
+    let assigned = 0;
+    while (assigned < count) {
+      const p = prayers[Math.floor(Math.random() * 5)];
+      if (!details[dateStr][p]) {
+        details[dateStr][p] = Math.random() > 0.35 ? 'tepat' : 'terlambat';
+        assigned++;
+      }
+    }
+  }
+  return { history, details };
+};
 
 export function AppProvider({ children }) {
   // Global Database States
@@ -35,10 +89,74 @@ export function AppProvider({ children }) {
 
   // Active Sessions
   const [currentUser, setCurrentUserRaw] = useState(() => loadFromStorage('sholatku_currentUser', null));
-  const [userMode, setUserModeRaw] = useState(() => loadFromStorage('sholatku_userMode', 'parent')); // 'parent' | 'kids' | 'adult' | 'admin'
-  const [isParentUnlocked, setIsParentUnlocked] = useState(false); // PIN gate access to Parent Dashboard page
+  const [userMode, setUserModeRaw] = useState(() => loadFromStorage('sholatku_userMode', 'parent'));
+  const [isParentUnlocked, setIsParentUnlocked] = useState(false);
+  const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+
+  // Additional session state for Frontend compatibility
+  const [isLoggedIn, setIsLoggedIn] = useState(() => loadFromStorage('sholatku_isLoggedIn', false));
+  const [activeProfile, setActiveProfile] = useState(() => loadFromStorage('sholatku_activeProfile', null));
+  const [isKidsMode, setIsKidsMode] = useState(() => loadFromStorage('sholatku_kidsMode', true));
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Profile & Gamifikasi Fallback State
+  const [profileRawState, setProfileRaw] = useState(() => ({
+    ...DEFAULT_PROFILE,
+    ...loadFromStorage('sholatku_profile', {}),
+  }));
+
+  // Daily Prayer Tracker Fallback State
+  const [trackerRawState, setTrackerRaw] = useState(() => {
+    const stored = loadFromStorage('sholatku_tracker', DEFAULT_TRACKER);
+    if (stored.date !== getTodayDateString()) {
+      return { ...DEFAULT_TRACKER, date: getTodayDateString() };
+    }
+    return stored;
+  });
+
+  // Target Orang Tua
+  const [parentTarget, setParentTargetRaw] = useState(() => loadFromStorage('sholatku_parentTarget', {
+    targetCount: 120,
+    reward: 'Mainan LEGO Creator 🧱',
+    isClaimed: false
+  }));
+
+  const setParentTarget = useCallback((val) => {
+    setParentTargetRaw(val);
+    saveToStorage('sholatku_parentTarget', val);
+  }, []);
+
+  // Detail Ketepatan Waktu Sholat
+  const [prayerPunctuality, setPrayerPunctualityRaw] = useState(() => {
+    const stored = loadFromStorage('sholatku_prayerPunctuality', null);
+    if (stored) return stored;
+    const mock = generateMockHistory();
+    return mock.details;
+  });
+
+  const setPrayerPunctuality = useCallback((updater) => {
+    setPrayerPunctualityRaw((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
+      saveToStorage('sholatku_prayerPunctuality', next);
+      return next;
+    });
+  }, []);
+
+  // Riwayat Sholat (Streak)
+  const [streakHistory, setStreakHistoryRaw] = useState(() => {
+    const stored = loadFromStorage('sholatku_streakHistory', []);
+    if (stored && stored.length > 0) return stored;
+    const mock = generateMockHistory();
+    saveToStorage('sholatku_streakHistory', mock.history);
+    saveToStorage('sholatku_prayerPunctuality', mock.details);
+    return mock.history;
+  });
+
+  const [adventureLevel, setAdventureLevelRaw] = useState(() =>
+    loadFromStorage('sholatku_adventureLevel', 0)
+  );
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -75,6 +193,35 @@ export function AppProvider({ children }) {
   const setUserMode = useCallback((val) => {
     setUserModeRaw(val);
     saveToStorage('sholatku_userMode', val);
+  }, []);
+
+  const setProfile = useCallback((updater) => {
+    setProfileRaw((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
+      saveToStorage('sholatku_profile', next);
+      return next;
+    });
+  }, []);
+
+  const setTracker = useCallback((updater) => {
+    setTrackerRaw((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
+      saveToStorage('sholatku_tracker', next);
+      return next;
+    });
+  }, []);
+
+  const setStreakHistory = useCallback((updater) => {
+    setStreakHistoryRaw((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      saveToStorage('sholatku_streakHistory', next);
+      return next;
+    });
+  }, []);
+
+  const setAdventureLevel = useCallback((val) => {
+    setAdventureLevelRaw(val);
+    saveToStorage('sholatku_adventureLevel', val);
   }, []);
 
   // ─── AUTHENTICATION HELPERS ─────────────────────────────────
@@ -123,6 +270,8 @@ export function AppProvider({ children }) {
     };
 
     setUsers([...users, newUser]);
+    setIsLoggedIn(true);
+    saveToStorage('sholatku_isLoggedIn', true);
     return { success: true };
   }, [users, setUsers]);
 
@@ -140,16 +289,27 @@ export function AppProvider({ children }) {
     };
 
     setUsers([...users, newUser]);
+    setIsLoggedIn(true);
+    saveToStorage('sholatku_isLoggedIn', true);
     return { success: true };
   }, [users, setUsers]);
+
+  const register = useCallback((data) => {
+    if (data.role === 'ortu' || data.role === 'parent') {
+      return registerParent(data.name, data.childName || 'Anak', data.email, data.password, data.pin || '1234');
+    } else {
+      return registerAdult(data.name, data.email, data.password);
+    }
+  }, [registerParent, registerAdult]);
 
   const login = useCallback((emailOrUsername, password) => {
     const user = users.find(u => (u.email === emailOrUsername || u.username === emailOrUsername) && u.password === password);
     if (user) {
       setCurrentUser(user);
       setIsParentUnlocked(false);
+      setIsLoggedIn(true);
+      saveToStorage('sholatku_isLoggedIn', true);
       
-      // Auto-route based on role
       if (user.role === 'admin') {
         setUserMode('admin');
       } else if (user.role === 'adult') {
@@ -166,9 +326,47 @@ export function AppProvider({ children }) {
     setCurrentUser(null);
     setUserMode('parent');
     setIsParentUnlocked(false);
+    setIsLoggedIn(false);
+    setActiveProfile(null);
+    saveToStorage('sholatku_isLoggedIn', false);
+    saveToStorage('sholatku_activeProfile', null);
   }, [setCurrentUser, setUserMode]);
 
-  // ─── HELPER FOR MUTATING CURRENT USER RECORD ──────────────────
+  const selectProfile = useCallback((role) => {
+    setActiveProfile(role);
+    saveToStorage('sholatku_activeProfile', role);
+    if (role === 'anak') {
+      setIsKidsMode(true);
+      setUserMode('kids');
+      saveToStorage('sholatku_kidsMode', true);
+    } else {
+      setIsKidsMode(false);
+      setUserMode('parent');
+      saveToStorage('sholatku_kidsMode', false);
+    }
+  }, [setUserMode]);
+
+  const toggleMode = useCallback(() => {
+    setIsKidsMode((prev) => {
+      const nextMode = !prev;
+      saveToStorage('sholatku_kidsMode', nextMode);
+      const profileRole = nextMode ? 'anak' : 'ortu';
+      setActiveProfile(profileRole);
+      setUserMode(nextMode ? 'kids' : 'parent');
+      saveToStorage('sholatku_activeProfile', profileRole);
+      return nextMode;
+    });
+  }, [setUserMode]);
+
+  const requestModeChange = useCallback(() => {
+    if (isKidsMode) {
+      setIsPinModalOpen(true);
+    } else {
+      toggleMode();
+    }
+  }, [isKidsMode, toggleMode]);
+
+  // Helper for mutating current user
   const updateCurrentUser = useCallback((updater) => {
     if (!currentUser) return;
     setUsers((prev) => {
@@ -185,7 +383,6 @@ export function AppProvider({ children }) {
     });
   }, [currentUser, setUsers]);
 
-  // Helper to update active child's stats (for parent)
   const updateChildStats = useCallback((updater) => {
     if (!currentUser || currentUser.role !== 'parent') return;
     updateCurrentUser((prev) => {
@@ -194,143 +391,181 @@ export function AppProvider({ children }) {
     });
   }, [currentUser, updateCurrentUser]);
 
-  // ─── GAMIFICATION ACTIONS (KIDS MODE) ──────────────────────────
+  // Gamification Actions
   const addXP = useCallback((amount) => {
-    updateChildStats((prev) => {
-      let xp = prev.xp + amount;
-      let level = prev.level;
-      let xpToNext = prev.xpToNext;
-      while (xp >= xpToNext) {
-        xp -= xpToNext;
-        level++;
-        xpToNext = Math.floor(xpToNext * 1.4);
-      }
-      return { ...prev, xp, level, xpToNext };
-    });
-  }, [updateChildStats]);
+    if (currentUser && currentUser.role === 'parent') {
+      updateChildStats((prev) => {
+        let xp = (prev?.xp || 0) + amount;
+        let level = prev?.level || 1;
+        let xpToNext = prev?.xpToNext || 100;
+        while (xp >= xpToNext) {
+          xp -= xpToNext;
+          level++;
+          xpToNext = Math.floor(xpToNext * 1.4);
+        }
+        return { ...prev, xp, level, xpToNext };
+      });
+    } else {
+      setProfile((prev) => {
+        let xp = prev.xp + amount;
+        let level = prev.level;
+        let xpToNext = prev.xpToNext;
+        while (xp >= xpToNext) {
+          xp -= xpToNext;
+          level++;
+          xpToNext = Math.floor(xpToNext * 1.4);
+        }
+        return { ...prev, xp, level, xpToNext };
+      });
+    }
+  }, [currentUser, updateChildStats, setProfile]);
 
   const addStars = useCallback((n = 1) => {
-    updateChildStats((prev) => ({ ...prev, stars: prev.stars + n }));
-  }, [updateChildStats]);
+    if (currentUser && currentUser.role === 'parent') {
+      updateChildStats((prev) => ({ ...prev, stars: (prev?.stars || 0) + n }));
+    } else {
+      setProfile((prev) => ({ ...prev, stars: prev.stars + n }));
+    }
+  }, [currentUser, updateChildStats, setProfile]);
 
   const addGems = useCallback((n = 1) => {
-    updateChildStats((prev) => ({ ...prev, gems: prev.gems + n }));
-  }, [updateChildStats]);
+    if (currentUser && currentUser.role === 'parent') {
+      updateChildStats((prev) => ({ ...prev, gems: (prev?.gems || 0) + n }));
+    } else {
+      setProfile((prev) => ({ ...prev, gems: prev.gems + n }));
+    }
+  }, [currentUser, updateChildStats, setProfile]);
 
   const completeMovement = useCallback((key) => {
-    if (!currentUser || currentUser.role !== 'parent') return;
-    const wasNew = !currentUser.childStats?.completedMovements?.includes(key);
-    if (wasNew) {
-      updateChildStats((prev) => ({
-        ...prev,
-        completedMovements: [...(prev.completedMovements || []), key]
-      }));
-      addXP(20);
-      addStars(1);
+    if (currentUser && currentUser.role === 'parent') {
+      const wasNew = !currentUser.childStats?.completedMovements?.includes(key);
+      if (wasNew) {
+        updateChildStats((prev) => ({
+          ...prev,
+          completedMovements: [...(prev?.completedMovements || []), key]
+        }));
+        addXP(20);
+        addStars(1);
+      }
+    } else {
+      const wasNew = !profileRawState.completedMovements.includes(key);
+      if (wasNew) {
+        setProfile((prev) => ({
+          ...prev,
+          completedMovements: [...prev.completedMovements, key]
+        }));
+        addXP(20);
+        addStars(1);
+      }
     }
-  }, [currentUser, updateChildStats, addXP, addStars]);
+  }, [currentUser, updateChildStats, profileRawState, setProfile, addXP, addStars]);
 
   const recordQuizCorrect = useCallback(() => {
-    updateChildStats((prev) => ({ ...prev, quizCorrect: (prev.quizCorrect || 0) + 1 }));
+    if (currentUser && currentUser.role === 'parent') {
+      updateChildStats((prev) => ({ ...prev, quizCorrect: (prev?.quizCorrect || 0) + 1 }));
+    } else {
+      setProfile((prev) => ({ ...prev, quizCorrect: prev.quizCorrect + 1 }));
+    }
     addXP(15);
     addGems(1);
-  }, [updateChildStats, addXP, addGems]);
+  }, [currentUser, updateChildStats, setProfile, addXP, addGems]);
 
-  // ─── PRAYER TRACKER & STREAK (KIDS MODE) ──────────────────────
   const togglePrayer = useCallback((prayerKey) => {
-    if (!currentUser || currentUser.role !== 'parent') return;
-    
-    updateChildStats((prev) => {
-      let currentTracker = { ...(prev.tracker || {}) };
-      if (currentTracker.date !== getTodayDateString()) {
-        currentTracker = {
-          date: getTodayDateString(),
-          fajr: false,
-          dhuhr: false,
-          asr: false,
-          maghrib: false,
-          isha: false,
-        };
-      }
-
-      const nextTracker = { ...currentTracker, [prayerKey]: !currentTracker[prayerKey] };
-      const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
-      const checkedCount = prayers.filter((k) => nextTracker[k]).length;
-
-      // Reward on check
-      if (!currentTracker[prayerKey]) {
-        setTimeout(() => {
-          addXP(10);
-          addStars(1);
-        }, 0);
-      }
-
-      // Bonus full day
-      if (checkedCount === 5) {
-        setTimeout(() => {
-          addXP(50);
-          addGems(3);
-        }, 0);
-      }
-
-      // Update streak history
-      let nextHistory = [...(prev.streakHistory || [])];
-      const todayIdx = nextHistory.findIndex(h => h.date === getTodayDateString());
-      const todayEntry = { date: getTodayDateString(), count: checkedCount };
-
-      if (todayIdx >= 0) {
-        nextHistory[todayIdx] = todayEntry;
-      } else {
-        nextHistory.push(todayEntry);
-      }
-
-      // Calculate streak
-      const sorted = [...nextHistory].sort((a, b) => b.date.localeCompare(a.date));
-      let streak = 0;
-      const d = new Date();
-      for (let i = 0; i < sorted.length; i++) {
-        const dStr = d.toISOString().split('T')[0];
-        if (sorted[i].date === dStr && sorted[i].count > 0) {
-          streak++;
-          d.setDate(d.getDate() - 1);
-        } else {
-          break;
+    if (currentUser && currentUser.role === 'parent') {
+      updateChildStats((prev) => {
+        let currentTracker = { ...(prev?.tracker || {}) };
+        if (currentTracker.date !== getTodayDateString()) {
+          currentTracker = {
+            date: getTodayDateString(),
+            fajr: false,
+            dhuhr: false,
+            asr: false,
+            maghrib: false,
+            isha: false,
+          };
         }
-      }
 
-      const longestStreak = Math.max(prev.longestStreak || 0, streak);
-      const totalPrayers = nextHistory.reduce((acc, h) => acc + h.count, 0);
-      const subuhDone = prayerKey === 'fajr' && !currentTracker.fajr ? true : prev.subuhDone;
+        const nextTracker = { ...currentTracker, [prayerKey]: !currentTracker[prayerKey] };
+        const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+        const checkedCount = prayers.filter((k) => nextTracker[k]).length;
 
-      return {
-        ...prev,
-        tracker: nextTracker,
-        streakHistory: nextHistory,
-        streak,
-        longestStreak,
-        totalPrayers,
-        subuhDone
-      };
-    });
-  }, [currentUser, updateChildStats, addXP, addStars, addGems]);
+        if (!currentTracker[prayerKey]) {
+          setTimeout(() => {
+            addXP(10);
+            addStars(1);
+          }, 0);
+        }
 
-  // Achievement checking trigger
-  useEffect(() => {
-    if (!currentUser || currentUser.role !== 'parent' || !currentUser.childStats) return;
-    const child = currentUser.childStats;
-    const newBadges = ACHIEVEMENTS
-      .filter((a) => !(child.earnedBadges || []).includes(a.id) && a.condition(child))
-      .map((a) => a.id);
-    
-    if (newBadges.length > 0) {
-      updateChildStats((prev) => ({
-        ...prev,
-        earnedBadges: [...(prev.earnedBadges || []), ...newBadges]
-      }));
+        if (checkedCount === 5) {
+          setTimeout(() => {
+            addXP(50);
+            addGems(3);
+          }, 0);
+        }
+
+        let nextHistory = [...(prev?.streakHistory || [])];
+        const todayIdx = nextHistory.findIndex(h => h.date === getTodayDateString());
+        const todayEntry = { date: getTodayDateString(), count: checkedCount };
+
+        if (todayIdx >= 0) {
+          nextHistory[todayIdx] = todayEntry;
+        } else {
+          nextHistory.push(todayEntry);
+        }
+
+        const sorted = [...nextHistory].sort((a, b) => b.date.localeCompare(a.date));
+        let streak = 0;
+        const d = new Date();
+        for (let i = 0; i < sorted.length; i++) {
+          const dStr = d.toISOString().split('T')[0];
+          if (sorted[i].date === dStr && sorted[i].count > 0) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+          } else {
+            break;
+          }
+        }
+
+        const longestStreak = Math.max(prev?.longestStreak || 0, streak);
+        const totalPrayers = nextHistory.reduce((acc, h) => acc + h.count, 0);
+        const subuhDone = prayerKey === 'fajr' && !currentTracker.fajr ? true : prev?.subuhDone;
+
+        return {
+          ...prev,
+          tracker: nextTracker,
+          streakHistory: nextHistory,
+          streak,
+          longestStreak,
+          totalPrayers,
+          subuhDone
+        };
+      });
+    } else {
+      setTracker((prev) => {
+        const nextTracker = { ...prev, [prayerKey]: !prev[prayerKey] };
+        const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+        const checkedCount = prayers.filter((k) => nextTracker[k]).length;
+
+        if (!prev[prayerKey]) {
+          setTimeout(() => {
+            addXP(10);
+            addStars(1);
+          }, 0);
+        }
+
+        if (checkedCount === 5) {
+          setTimeout(() => {
+            addXP(50);
+            addGems(3);
+          }, 0);
+        }
+
+        return nextTracker;
+      });
     }
-  }, [currentUser, updateChildStats]);
+  }, [currentUser, updateChildStats, setTracker, addXP, addStars, addGems]);
 
-  // ─── ADMIN MOVEMENT DATABASE MANAGEMENT ─────────────────────
+  // Admin and Hafalan management
   const addOrUpdateMovement = useCallback((movementData) => {
     setMovements((prev) => {
       const idx = prev.findIndex(m => m.id === movementData.id || m.key === movementData.key);
@@ -348,7 +583,6 @@ export function AppProvider({ children }) {
     setMovements((prev) => prev.filter(m => m.id !== id));
   }, [setMovements]);
 
-  // ─── MEMORIZATION GRADING (SETORAN HAFALAN) ──────────────────
   const submitHafalan = useCallback((movementKey, movementName) => {
     if (!currentUser || currentUser.role !== 'parent') return { success: false, message: 'Harus login sebagai Orang Tua!' };
     
@@ -360,7 +594,7 @@ export function AppProvider({ children }) {
       movementKey,
       movementName,
       timestamp: new Date().toISOString(),
-      score: null, // 1 to 5 stars
+      score: null,
       comment: '',
       status: 'pending'
     };
@@ -373,7 +607,6 @@ export function AppProvider({ children }) {
     setSubmissions((prev) =>
       prev.map((sub) => {
         if (sub.id === submissionId) {
-          // Award XP/Gems to Parent's Child Stats
           setUsers((allUsers) =>
             allUsers.map((u) => {
               if (u.id === sub.parentId) {
@@ -402,43 +635,13 @@ export function AppProvider({ children }) {
               return u;
             })
           );
-
-          // Update active session user if graded for current session
-          if (currentUser && currentUser.id === sub.parentId) {
-            setTimeout(() => {
-              updateChildStats((prev) => {
-                let xpAward = score * 10;
-                let gemsAward = score;
-                let xp = prev.xp + xpAward;
-                let level = prev.level;
-                let xpToNext = prev.xpToNext;
-                while (xp >= xpToNext) {
-                  xp -= xpToNext;
-                  level++;
-                  xpToNext = Math.floor(xpToNext * 1.4);
-                }
-                return {
-                  ...prev,
-                  xp,
-                  level,
-                  xpToNext,
-                  gems: prev.gems + gemsAward,
-                  completedMovements: prev.completedMovements.includes(sub.movementKey) 
-                    ? prev.completedMovements 
-                    : [...prev.completedMovements, sub.movementKey]
-                };
-              });
-            }, 0);
-          }
-
           return { ...sub, score, comment, status: 'graded' };
         }
         return sub;
       })
     );
-  }, [currentUser, setUsers, updateChildStats, submissions, setSubmissions]);
+  }, [setUsers, setSubmissions]);
 
-  // ─── REWARDS MANAGEMENT (SAVED INSIDE PARENT RECORD) ─────────
   const addReward = useCallback((name, targetStreak) => {
     if (!currentUser || currentUser.role !== 'parent') return;
     const newReward = {
@@ -465,7 +668,6 @@ export function AppProvider({ children }) {
     updateCurrentUser({ rewards: nextRewards });
   }, [currentUser, updateCurrentUser]);
 
-  // ─── ADULT SURAH PROGRESS ───────────────────────────────────
   const toggleAdultSurah = useCallback((surahId, status) => {
     if (!currentUser || currentUser.role !== 'adult') return;
     const currentProgress = currentUser.adultSurahProgress || {};
@@ -473,14 +675,10 @@ export function AppProvider({ children }) {
     updateCurrentUser({ adultSurahProgress: nextProgress });
   }, [currentUser, updateCurrentUser]);
 
-  // Dynamic helper calculations
-  const prayersDoneToday = currentUser && currentUser.role === 'parent' && currentUser.childStats
-    ? ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].filter((k) => {
-        let currentTracker = currentUser.childStats.tracker || {};
-        if (currentTracker.date !== getTodayDateString()) return false;
-        return currentTracker[k];
-      }).length
-    : 0;
+  const activeProfileData = currentUser?.childStats || profileRawState;
+  const activeTrackerData = currentUser?.childStats?.tracker || trackerRawState;
+
+  const prayersDoneToday = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].filter((k) => activeTrackerData[k]).length;
 
   const value = {
     // Database tables
@@ -498,19 +696,39 @@ export function AppProvider({ children }) {
     sidebarOpen,
     setSidebarOpen,
     isMobile,
+
+    isLoggedIn,
+    activeProfile,
+    selectProfile,
+    isKidsMode,
+    toggleMode,
+    requestModeChange,
+    isPinModalOpen,
+    setIsPinModalOpen,
     
     // Auth actions
     login,
+    register,
     registerParent,
     registerAdult,
     logout,
     
-    // Child stats fallback (when parent switches to kids mode)
-    profile: currentUser?.childStats || null,
-    tracker: currentUser?.childStats?.tracker || {},
+    // Profile & Tracker
+    profile: activeProfileData,
+    setProfile,
+    tracker: activeTrackerData,
+    setTracker,
     prayersDoneToday,
+    streakHistory,
+    setStreakHistory,
+    adventureLevel,
+    setAdventureLevel,
+    parentTarget,
+    setParentTarget,
+    prayerPunctuality,
+    setPrayerPunctuality,
     
-    // Gamification actions (redirected to childStats)
+    // Gamification actions
     addXP,
     addStars,
     addGems,

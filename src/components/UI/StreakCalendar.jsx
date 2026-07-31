@@ -43,9 +43,9 @@ export default function StreakCalendar({ weeks = 10 }) {
   return (
     <div>
       {/* Day labels */}
-      <div className="streak-grid" style={{ marginBottom: 4 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 4 }}>
         {DAY_LABELS.map((d) => (
-          <div key={d} style={{ textAlign: 'center', fontSize: 10, fontWeight: 700, color: 'var(--text-muted)' }}>
+          <div key={d} style={{ textAlign: 'center', fontSize: 10, fontWeight: 700, color: '#556B52' }}>
             {d}
           </div>
         ))}
@@ -54,12 +54,29 @@ export default function StreakCalendar({ weeks = 10 }) {
       {/* Calendar cells */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {weekRows.map((week, wi) => (
-          <div key={wi} className="streak-grid">
+          <div key={wi} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
             {week.map((cell) => (
               <div
                 key={cell.dateStr}
-                className={`streak-day ${cell.status} ${cell.isToday ? 'today' : ''}`}
                 title={`${cell.dateStr}: ${cell.count}/5 sholat`}
+                style={{
+                  aspectRatio: '1',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '6px',
+                  fontSize: '10px',
+                  fontWeight: 800,
+                  cursor: 'default',
+                  backgroundColor:
+                    cell.status === 'full'    ? '#113C2B' :
+                    cell.status === 'partial' ? '#7BAB8B' : '#E8EFE8',
+                  color:
+                    cell.status === 'full'    ? '#FFFFFF' :
+                    cell.status === 'partial' ? '#FFFFFF' : '#556B52',
+                  outline: cell.isToday ? '2px solid #113C2B' : 'none',
+                  outlineOffset: '2px',
+                }}
               >
                 {cell.isToday ? '●' : cell.day}
               </div>
@@ -69,17 +86,17 @@ export default function StreakCalendar({ weeks = 10 }) {
       </div>
 
       {/* Legend */}
-      <div style={{ display: 'flex', gap: 16, marginTop: 10, justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)' }}>
+      <div style={{ display: 'flex', gap: 16, marginTop: 10, justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#556B52' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ width: 12, height: 12, background: 'var(--primary)', borderRadius: 3, display: 'inline-block' }} />
+          <span style={{ width: 12, height: 12, background: '#113C2B', borderRadius: 3, display: 'inline-block' }} />
           Lengkap 5 waktu
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ width: 12, height: 12, background: 'var(--accent)', borderRadius: 3, display: 'inline-block' }} />
+          <span style={{ width: 12, height: 12, background: '#7BAB8B', borderRadius: 3, display: 'inline-block' }} />
           Sebagian
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ width: 12, height: 12, background: 'var(--border)', borderRadius: 3, display: 'inline-block' }} />
+          <span style={{ width: 12, height: 12, background: '#E8EFE8', borderRadius: 3, display: 'inline-block' }} />
           Belum
         </span>
       </div>

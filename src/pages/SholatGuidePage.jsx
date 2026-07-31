@@ -4,16 +4,16 @@ import { ChevronLeft, ChevronRight, CheckCircle, Volume2, Mic, Check, BookOpen }
 import { useApp } from '../context/AppContext';
 import AudioPlayer from '../components/UI/AudioPlayer';
 
-const YOUTUBE_VIDEO_ID = 'TqRvfvAMtOc'; // Video tutorial sholat
+const YOUTUBE_VIDEO_ID = 'TqRvfvAMtOc';
 
 export default function PrayerGuide() {
-  const { userMode, profile, movements, completeMovement } = useApp();
+  const { userMode, profile, movements, completeMovement, isKidsMode } = useApp();
   const [currentIdx, setCurrentIdx] = useState(0);
   const [autoplay, setAutoplay] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [justCompleted, setJustCompleted] = useState(false);
 
-  const isKidsMode = userMode === 'kids';
+  const isKids = userMode === 'kids' || isKidsMode;
   const movement = movements[currentIdx];
   
   const completedMovements = profile?.completedMovements || [];
@@ -51,12 +51,10 @@ export default function PrayerGuide() {
     );
   }
 
-  const isAdultTheme = userMode === 'adult' || userMode === 'parent' || userMode === 'admin';
-
-  // ─── KIDS LAYOUT: FIGMA MOCKUP 1 (Interaction Update) ───
-  if (isKidsMode) {
+  // KIDS LAYOUT
+  if (isKids) {
     return (
-      <div className="animate-fadeIn" style={{ padding: '16px', maxWidth: '1100px', margin: '0 auto' }}>
+      <div className="animate-fadeInUp" style={{ padding: '16px', maxWidth: '1100px', margin: '0 auto' }}>
         
         {/* Bento Grid: 2 Columns */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', alignItems: 'stretch', marginBottom: '20px' }}>
@@ -66,7 +64,7 @@ export default function PrayerGuide() {
             
             {/* Green Card: Movement Info */}
             <div className="clay-card" style={{ 
-              background: '#6fff9d', border: '3px solid var(--game-dark)', padding: '20px',
+              background: '#6fff9d', border: '3px solid var(--game-dark)', padding: '20px', borderRadius: '24px',
               display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '220px'
             }}>
               <div>
@@ -77,10 +75,10 @@ export default function PrayerGuide() {
                   Gerakan ke-{currentIdx + 1}
                 </span>
                 <h3 style={{ fontFamily: 'var(--font-headline)', fontSize: '26px', fontWeight: 950, color: 'var(--game-dark)', margin: '12px 0 6px' }}>
-                  {movement.nameKids}
+                  {movement.nameKids || movement.name}
                 </h3>
                 <p style={{ fontSize: '13px', fontWeight: 800, color: 'var(--game-dark)', lineHeight: 1.4, opacity: 0.8, margin: 0 }}>
-                  {movement.explanationKids}
+                  {movement.explanationKids || movement.explanation}
                 </p>
               </div>
 
@@ -107,13 +105,12 @@ export default function PrayerGuide() {
 
             {/* Purple Card: Arabic Text Box */}
             <div className="clay-card purple" style={{ 
-              border: '3px solid var(--game-dark)', padding: '20px', textAlign: 'center' 
+              border: '3px solid var(--game-dark)', padding: '20px', borderRadius: '24px', textAlign: 'center' 
             }}>
               <span style={{ fontSize: '10.5px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.9, display: 'block', marginBottom: '8px' }}>
                 BACAAN BENTUK ARAB
               </span>
 
-              {/* White reading box */}
               {movement.arabicText ? (
                 <div style={{ background: '#fff', border: '3.5px solid var(--game-dark)', borderRadius: '14px', padding: '14px', marginBottom: '10px', boxShadow: '3px 3px 0 var(--game-dark)' }}>
                   <div style={{ fontSize: '22px', fontWeight: 600, direction: 'rtl', fontFamily: 'serif', lineHeight: '2.0', color: 'var(--game-dark)' }}>
@@ -126,7 +123,6 @@ export default function PrayerGuide() {
                 </div>
               )}
 
-              {/* Latin & Translation */}
               {movement.latin && (
                 <p style={{ margin: '4px 0', fontSize: '12.5px', fontWeight: 800, color: '#fff', fontStyle: 'italic' }}>
                   "{movement.latin}"
@@ -138,10 +134,9 @@ export default function PrayerGuide() {
 
           {/* Right Column: Illustration Card */}
           <div className="clay-card" style={{ 
-            background: '#fff', border: '3px solid var(--game-dark)', padding: '20px',
+            background: '#fff', border: '3px solid var(--game-dark)', padding: '20px', borderRadius: '24px',
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative'
           }}>
-            {/* Status tag top right */}
             <span style={{
               position: 'absolute', top: '16px', right: '16px', zIndex: 5,
               background: '#6fff9d', color: 'var(--game-dark)', border: '2.5px solid var(--game-dark)',
@@ -151,7 +146,6 @@ export default function PrayerGuide() {
               {isCompleted ? 'Sudah Dikuasai! ✓' : 'Hampir Selesai! ⚡'}
             </span>
 
-            {/* Illustration */}
             <div style={{ 
               width: '100%', height: '100%', minHeight: '260px',
               display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative'
@@ -172,7 +166,7 @@ export default function PrayerGuide() {
 
         </div>
 
-        {/* Bottom Actions Row: Dengarkan, Uji Bacaan, Selesai */}
+        {/* Bottom Actions Row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
           
           <button 
@@ -214,7 +208,6 @@ export default function PrayerGuide() {
 
         </div>
 
-        {/* Audio Hidden Track if auto playing */}
         {movement.audioUrl && (
           <div style={{ display: 'none' }}>
             <AudioPlayer
@@ -228,11 +221,10 @@ export default function PrayerGuide() {
     );
   }
 
-  // ─── ADULT/ADMIN CLEAN LAYOUT ───
+  // ADULT/ADMIN CLEAN LAYOUT
   return (
-    <div className="animate-fadeIn" style={{ padding: '16px' }}>
+    <div className="animate-fadeInUp" style={{ padding: '16px' }}>
       
-      {/* Title */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #E2E8F0', paddingBottom: '12px', marginBottom: '24px' }}>
         <BookOpen size={20} style={{ color: '#065F46' }} />
         <h2 style={{ 
@@ -245,20 +237,21 @@ export default function PrayerGuide() {
         </h2>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 280px)) 1fr', gap: 20, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px', alignItems: 'start' }}>
         
         {/* Left Sidebar: Movement List */}
         <div 
           style={{ 
             background: '#fff',
-            border: '1px solid #E2E8F0',
-            borderRadius: '10px',
+            border: '2px solid #000',
+            borderRadius: '16px',
+            boxShadow: '4px 4px 0px #000',
             padding: '20px 14px',
             position: 'sticky', top: 20, maxHeight: 'calc(100vh - 180px)', overflowY: 'auto' 
           }}
         >
           <div style={{ fontWeight: 900, fontSize: '13px', color: '#1E293B', marginBottom: '12px' }}>
-            📋 Daftar Gerakan:
+            📋 DAFTAR GERAKAN
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {movements.map((m, i) => {
@@ -294,7 +287,6 @@ export default function PrayerGuide() {
             })}
           </div>
 
-          {/* Autoplay Toggle */}
           <div style={{ marginTop: 14, padding: '10px 0', borderTop: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748B' }}>Putar Otomatis</span>
             <div className="autoplay-toggle" onClick={() => setAutoplay(a => !a)}>
@@ -308,18 +300,15 @@ export default function PrayerGuide() {
         {/* Right Main Panel */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          {/* Main Card */}
           <div 
-            className="clay-card"
             style={{ 
               background: '#fff',
-              border: '1px solid #E2E8F0',
-              borderRadius: '12px',
+              border: '2px solid #000',
+              boxShadow: '4px 4px 0px #000',
+              borderRadius: '16px',
               padding: '24px'
             }}
           >
-            
-            {/* Visual Header */}
             <div style={{ 
               background: '#FAF9F6',
               borderBottom: '1px solid #E2E8F0',
@@ -342,7 +331,6 @@ export default function PrayerGuide() {
               </div>
             </div>
 
-            {/* Info details */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '16px' }}>
               <div>
                 <h3 style={{ 
@@ -357,7 +345,6 @@ export default function PrayerGuide() {
               </div>
             </div>
 
-            {/* Arabic Reading */}
             {movement.arabicText && (
               <div style={{ 
                 background: '#FAF9F6', 
@@ -371,7 +358,6 @@ export default function PrayerGuide() {
               </div>
             )}
 
-            {/* Latin & Translation */}
             {movement.latin && (
               <div style={{ marginBottom: '12px' }}>
                 <span style={{ fontSize: '10px', fontWeight: 900, color: '#059669', textTransform: 'uppercase' }}>Transliterasi</span>
@@ -389,7 +375,6 @@ export default function PrayerGuide() {
               </div>
             )}
 
-            {/* Explanation box */}
             <div style={{ 
               background: 'rgba(6, 95, 70, 0.05)', 
               border: '2px solid #A7F3D0',
@@ -403,7 +388,6 @@ export default function PrayerGuide() {
               </p>
             </div>
 
-            {/* Audio Playback */}
             {movement.audioUrl && (
               <div style={{ marginBottom: '20px' }}>
                 <AudioPlayer
@@ -415,60 +399,50 @@ export default function PrayerGuide() {
               </div>
             )}
 
+            <button 
+              onClick={handleMarkComplete}
+              disabled={isCompleted}
+              style={{ 
+                width: '100%',
+                padding: '14px', fontSize: '15px', fontWeight: 900,
+                borderRadius: '12px', border: '2px solid #000',
+                backgroundColor: isCompleted ? '#E2E8F0' : '#059669',
+                color: isCompleted ? '#64748B' : '#FFFFFF',
+                boxShadow: '3px 3px 0px #000',
+                cursor: isCompleted ? 'default' : 'pointer'
+              }}
+            >
+              {justCompleted ? 'Level Diselesaikan! +50 XP ⭐' : isCompleted ? 'Gerakan Sudah Dikuasai ✓' : 'Selesaikan Gerakan Ini (+50 XP) 🎁'}
+            </button>
           </div>
 
-          {/* Navigation bar controls */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <button 
               onClick={goPrev} 
               disabled={currentIdx === 0}
-              className="clay-btn"
-              style={{ padding: '8px 16px', border: '1px solid #CBD5E0' }}
+              style={{ padding: '10px 16px', fontWeight: 800, borderRadius: '10px', border: '2px solid #000', backgroundColor: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
             >
               <ChevronLeft size={16} /> Sebelumnya
             </button>
 
-            <div style={{ display: 'flex', gap: '6px' }}>
-              {movements.map((m, i) => (
-                <div
-                  key={i}
-                  onClick={() => setCurrentIdx(i)}
-                  style={{
-                    cursor: 'pointer', width: '10px', height: '10px', borderRadius: '50%',
-                    backgroundColor: i === currentIdx ? '#059669' : (completedMovements.includes(m.key) ? '#34D399' : '#CBD5E0'),
-                    transition: 'all 0.2s'
-                  }}
-                />
-              ))}
-            </div>
-
             <button 
               onClick={goNext} 
               disabled={currentIdx === totalCount - 1}
-              className="clay-btn purple"
-              style={{ padding: '8px 16px' }}
+              style={{ padding: '10px 16px', fontWeight: 800, borderRadius: '10px', border: '2px solid #000', backgroundColor: '#059669', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
             >
               Selanjutnya <ChevronRight size={16} />
             </button>
           </div>
 
-          {/* Video Section (Optional collapsible) */}
-          <div 
-            style={{ 
-              background: '#fff',
-              border: '1px solid #E2E8F0',
-              borderRadius: '12px',
-              padding: '20px', marginTop: '12px'
-            }}
-          >
+          {/* Video Section */}
+          <div style={{ background: '#fff', border: '2px solid #000', borderRadius: '16px', padding: '20px', boxShadow: '4px 4px 0px #000' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <h4 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 900, color: '#1E293B', margin: 0 }}>
                 🎬 Video Tutorial Sholat
               </h4>
               <button 
                 onClick={() => setShowVideo(!showVideo)}
-                className="clay-btn"
-                style={{ padding: '6px 12px', fontSize: '12px' }}
+                style={{ padding: '6px 12px', fontSize: '12px', fontWeight: 800, borderRadius: '8px', border: '2px solid #000', backgroundColor: '#fff', cursor: 'pointer' }}
               >
                 {showVideo ? 'Tutup Video' : 'Tonton Video'}
               </button>

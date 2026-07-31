@@ -10,15 +10,20 @@ import SholatQuizPage from './pages/SholatQuizPage';
 import AdventurePage from './pages/AdventurePage';
 import ProfilePage from './pages/ProfilePage';
 import ParentDashboardPage from './pages/ParentDashboard';
+import DasboardOrangTua from './pages/DasboardOrangTua';
+import ChildDashboardPage from './pages/DashboardAnak';
+import DasboardDewasa from './pages/DasboardDewasa';
+import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ProfilePicker from './pages/ProfilePicker';
 import DoaSurahPage from './pages/DoaSurahPage';
 import HafalanTestPage from './pages/HafalanTestPage';
 import AdultSurahPage from './pages/AdultSurahPage';
 import SholatSchedulePage from './pages/SholatSchedulePage';
 import AdminDashboard from './pages/AdminDashboard';
 
-function ParentalGateModal() {
+function ParentalGateModal({ setActivePage }) {
   const { isPinModalOpen, setIsPinModalOpen, currentUser, setUserMode } = useApp();
   const [pinInput, setPinInput] = useState('');
   const [isError, setIsError] = useState(false);
@@ -29,10 +34,11 @@ function ParentalGateModal() {
     e.preventDefault();
     const correctPin = currentUser?.pin || '1234';
     if (pinInput === correctPin) {
-      setUserMode('parent'); // Switch back to Parent Dashboard
+      if (setUserMode) setUserMode('parent');
       setIsPinModalOpen(false);
       setPinInput('');
       setIsError(false);
+      if (setActivePage) setActivePage('parent-dashboard');
     } else {
       setIsError(true);
       setPinInput('');
@@ -45,10 +51,10 @@ function ParentalGateModal() {
       backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)',
       display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999
     }}>
-      <div className="clay-card animate-fadeInUp" style={{ maxWidth: '360px', width: '90%', textAlign: 'center', border: '1px solid #e2e8f0', padding: '24px' }}>
+      <div className="clay-card animate-fadeInUp" style={{ maxWidth: '360px', width: '90%', textAlign: 'center', border: '3px solid #000', padding: '24px', borderRadius: '24px', backgroundColor: '#fff', boxShadow: '6px 6px 0px #000' }}>
         <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔒</div>
-        <h3 style={{ margin: '0 0 8px', fontWeight: 900, color: '#7c3aed' }}>Khusus Orang Tua</h3>
-        <p style={{ fontSize: '13px', fontWeight: 700, color: '#718096', marginBottom: '16px' }}>
+        <h3 style={{ margin: '0 0 8px', fontWeight: 900, color: '#113C2B' }}>Khusus Orang Tua</h3>
+        <p style={{ fontSize: '13px', fontWeight: 700, color: '#556B52', marginBottom: '16px' }}>
           Masukkan 4 digit PIN Anda untuk kembali ke Dashboard Orang Tua.
         </p>
 
@@ -60,16 +66,17 @@ function ParentalGateModal() {
             value={pinInput}
             onChange={(e) => {
               setIsError(false);
-              setPinInput(e.target.value.replace(/\D/g, '')); 
+              setPinInput(e.target.value.replace(/\D/g, ''));
             }}
             style={{
               width: '100%', padding: '12px', fontSize: '24px', letterSpacing: '8px',
-              textAlign: 'center', borderRadius: '12px', border: isError ? '1px solid #DC2626' : '1px solid #CBD5E1',
-              backgroundColor: '#F7FAFC', outline: 'none', marginBottom: '12px', fontWeight: 900
+              textAlign: 'center', borderRadius: '12px', border: isError ? '3px solid #ef4444' : '3px solid #113C2B',
+              backgroundColor: '#F8FAF8', outline: 'none', marginBottom: '12px', fontWeight: 900,
+              boxSizing: 'border-box'
             }}
             autoFocus
           />
-          
+
           {isError && (
             <p style={{ color: '#E53E3E', fontSize: '12px', fontWeight: 800, margin: '0 0 12px' }}>
               ❌ PIN salah! Coba koreksi lagi.
@@ -89,7 +96,7 @@ function ParentalGateModal() {
             >
               Batal
             </button>
-            <button type="submit" className="clay-btn purple" style={{ flex: 1, padding: '10px' }}>
+            <button type="submit" className="clay-btn purple" style={{ flex: 1, padding: '10px', backgroundColor: '#113C2B', borderColor: '#082218', boxShadow: '4px 4px 0px #082218', color: '#fff' }}>
               Verifikasi
             </button>
           </div>
@@ -100,11 +107,9 @@ function ParentalGateModal() {
 }
 
 function AppContent() {
+  const { isLoggedIn, activeProfile, currentUser, userMode, sidebarOpen, setSidebarOpen, isKidsMode } = useApp();
   const [activePage, setActivePage] = useState('home');
-  const [authView, setAuthView] = useState('login'); // 'login' | 'register'
-  const { currentUser, userMode, sidebarOpen, setSidebarOpen, isMobile } = useApp();
 
-  // Dynamic body class injector based on kids mode
   useEffect(() => {
     if (userMode === 'kids') {
       document.body.classList.add('kids-theme-active');
@@ -116,27 +121,41 @@ function AppContent() {
     };
   }, [userMode]);
 
-  // Handle routing when mode changes
   useEffect(() => {
-    if (userMode === 'adult') {
-      setActivePage('prayer-guide');
-    } else if (userMode === 'admin') {
-      setActivePage('admin-panel');
-    } else if (userMode === 'parent') {
-      setActivePage('parent-dashboard');
-    } else if (userMode === 'kids') {
-      setActivePage('home');
+    if (isLoggedIn || currentUser) {
+      if (activePage === 'landing' || activePage === 'login' || activePage === 'register') {
+        if (userMode === 'admin') {
+          setActivePage('admin-panel');
+        } else if (userMode === 'adult' || activeProfile === 'dewasa') {
+          setActivePage('adult-quran');
+        } else if (userMode === 'parent' || activeProfile === 'ortu') {
+          setActivePage('parent-dashboard');
+        } else {
+          setActivePage('home');
+        }
+      }
     }
-  }, [userMode]);
-
-  // If user is not logged in, show Login/Register Page
-  if (!currentUser) {
-    return authView === 'login' 
-      ? <LoginPage onRegisterClick={() => setAuthView('register')} /> 
-      : <RegisterPage onLoginClick={() => setAuthView('login')} />;
-  }
+  }, [isLoggedIn, currentUser, activeProfile, userMode]);
 
   const renderPage = () => {
+    const isAuthenticated = isLoggedIn || !!currentUser;
+
+    if (!isAuthenticated) {
+      switch (activePage) {
+        case 'login':
+          return <LoginPage onRegisterClick={() => setActivePage('register')} setActivePage={setActivePage} />;
+        case 'register':
+          return <RegisterPage onLoginClick={() => setActivePage('login')} setActivePage={setActivePage} />;
+        case 'landing':
+        default:
+          return <LandingPage setActivePage={setActivePage} />;
+      }
+    }
+
+    if (activePage === 'profile-picker') {
+      return <ProfilePicker setActivePage={setActivePage} />;
+    }
+
     switch (activePage) {
       case 'home':
         return <HomePage setActivePage={setActivePage} />;
@@ -150,8 +169,26 @@ function AppContent() {
         return <AdventurePage />;
       case 'profile':
         return <ProfilePage />;
+      case 'child-dashboard':
+        return <ChildDashboardPage />;
       case 'parent-dashboard':
         return <ParentDashboardPage />;
+      case 'parent-punctuality':
+        return <DasboardOrangTua section="punctuality" />;
+      case 'parent-missed':
+        return <DasboardOrangTua section="missed" />;
+      case 'parent-target':
+        return <DasboardOrangTua section="target" />;
+      case 'adult-quran':
+        return <DasboardDewasa section="quran" />;
+      case 'adult-guide':
+        return <DasboardDewasa section="guide" />;
+      case 'adult-schedule':
+        return <SholatSchedulePage />;
+      case 'adult-kiblat':
+        return <DasboardDewasa section="kiblat" />;
+      case 'adult-dzikir':
+        return <DasboardDewasa section="dzikir" />;
       case 'doa-surah':
         return <DoaSurahPage />;
       case 'hafalan-test':
@@ -167,39 +204,27 @@ function AppContent() {
     }
   };
 
+  const isAuthenticated = isLoggedIn || !!currentUser;
+
+  if (!isAuthenticated || activePage === 'landing' || activePage === 'login' || activePage === 'register' || activePage === 'profile-picker') {
+    return <main style={{ flex: 1, position: 'relative' }}>{renderPage()}</main>;
+  }
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
+    <div className={`main-app-container ${isKidsMode ? 'kids-mode' : 'parent-mode'}`}>
       <AppSidebar activePage={activePage} setActivePage={setActivePage} />
 
-      {/* Mobile Sidebar Backdrop Overlay Scrim */}
-      {isMobile && sidebarOpen && (
-        <div 
-          onClick={() => setSidebarOpen(false)} 
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', 
-            backdropFilter: 'blur(4px)', zIndex: 990
-          }}
-        />
-      )}
+      <div className={`page-content-wrapper ${sidebarOpen ? 'sidebar-is-open' : 'sidebar-is-closed'}`}>
+        <div className="header-container-block">
+          <AppHeader setActivePage={setActivePage} />
+        </div>
 
-      <div className="main-content-wrapper" style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        marginLeft: (isMobile || !sidebarOpen) ? '0px' : '240px', 
-        transition: 'margin-left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-        height: '100vh',
-        overflowY: 'auto',
-        overflowX: 'hidden',
-      }}>
-        <AppHeader setActivePage={setActivePage} />
-
-        <main style={{ flex: 1, position: 'relative' }}>
+        <main className="dashboard-main-core">
           {renderPage()}
         </main>
       </div>
 
-      <ParentalGateModal />
+      <ParentalGateModal setActivePage={setActivePage} />
     </div>
   );
 }

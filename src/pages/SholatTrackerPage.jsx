@@ -2,21 +2,21 @@
 import { useApp } from '../context/AppContext';
 import { PRAYER_NAMES } from '../data/data';
 import StreakCalendar from '../components/UI/StreakCalendar';
-import { Check, Flame, Trophy } from 'lucide-react';
+import { Check, Trophy } from 'lucide-react';
 
 export default function Tracker() {
-  const { userMode, profile, tracker, togglePrayer, prayersDoneToday } = useApp();
-  const isKidsMode = userMode === 'kids';
+  const { userMode, profile, tracker, togglePrayer, prayersDoneToday, isKidsMode } = useApp();
+  const isKids = userMode === 'kids' || isKidsMode;
 
   const prayerProgress = Math.round((prayersDoneToday / 5) * 100);
-  const monthlyTotal = profile ? Math.round((profile.totalPrayers / (new Date().getDate() * 5)) * 100) : 0;
+  const monthlyTotal = profile ? Math.round(((profile.totalPrayers || 0) / (new Date().getDate() * 5)) * 100) : 0;
 
   const currentStreak = profile?.streak || 0;
 
-  // ─── KIDS LAYOUT: FIGMA MOCKUP 4 (Prayer Tracker Kinetic Edition) ───
-  if (isKidsMode) {
+  // KIDS LAYOUT
+  if (isKids) {
     return (
-      <div className="animate-fadeIn" style={{ padding: '16px', maxWidth: '1000px', margin: '0 auto' }}>
+      <div className="animate-fadeInUp" style={{ padding: '16px', maxWidth: '1000px', margin: '0 auto' }}>
         
         {/* Upper Bento Row: Hero title & Mascot Flame Card */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', alignItems: 'center', marginBottom: '24px' }}>
@@ -32,8 +32,8 @@ export default function Tracker() {
 
           {/* Flame Mascot Card */}
           <div className="clay-card" style={{ 
-            background: '#fff', border: '3px solid var(--game-dark)', padding: '16px 24px',
-            display: 'flex', alignItems: 'center', gap: '16px', justifyContent: 'space-between'
+            background: '#fff', border: '3px solid var(--game-dark)', padding: '16px 24px', borderRadius: '24px',
+            display: 'flex', alignItems: 'center', gap: '16px', justifyContent: 'space-between', boxShadow: '4px 4px 0px #000'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{ fontSize: '36px', animation: 'float 2s ease-in-out infinite' }}>🔥</div>
@@ -52,7 +52,7 @@ export default function Tracker() {
           </div>
         </div>
 
-        {/* 5 Vertical Purple Cards Grid */}
+        {/* 5 Vertical Cards Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '24px' }}>
           {PRAYER_NAMES.map((prayer) => {
             const isDone = tracker && tracker[prayer.key];
@@ -70,7 +70,6 @@ export default function Tracker() {
                   boxShadow: '4px 4px 0 var(--game-dark)'
                 }}
               >
-                {/* Completed Check icon in top right */}
                 <div style={{
                   position: 'absolute', top: '12px', right: '12px',
                   width: '24px', height: '24px', borderRadius: '50%',
@@ -84,23 +83,22 @@ export default function Tracker() {
                 <div style={{ marginTop: '20px' }}>
                   <div style={{ fontSize: '36px', marginBottom: '4px' }}>{prayer.emoji}</div>
                   <h4 style={{ fontSize: '18px', fontWeight: 900, color: '#fff', margin: '0 0 2px' }}>
-                    {prayer.labelKids}
+                    {prayer.labelKids || prayer.label}
                   </h4>
                   <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', fontWeight: 800 }}>
                     {rakaatText}
                   </span>
                 </div>
 
-                {/* Done or Check in button */}
                 <button
                   onClick={() => togglePrayer(prayer.key)}
                   className={`clay-btn ${isDone ? 'green' : ''}`}
                   style={{
-                    width: '100%', padding: '8px 4px', fontSize: '12px',
+                    width: '100%', padding: '8px 4px', fontSize: '12px', fontWeight: 900,
                     border: '2px solid var(--game-dark)', borderRadius: '12px',
                     background: isDone ? '#6fff9d !important' : '#fff !important',
                     color: 'var(--game-dark) !important',
-                    boxShadow: '2px 2px 0 var(--game-dark)'
+                    boxShadow: '2px 2px 0 var(--game-dark)', cursor: 'pointer'
                   }}
                 >
                   {isDone ? 'Done! ✓' : 'Check in'}
@@ -112,8 +110,9 @@ export default function Tracker() {
 
         {/* Bottom Card: Weekly Streak & Claim Reward */}
         <div className="clay-card" style={{ 
-          background: '#fff', border: '3.5px solid var(--game-dark)', padding: '24px',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px'
+          background: '#fff', border: '3.5px solid var(--game-dark)', padding: '24px', borderRadius: '24px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px',
+          boxShadow: '4px 4px 0px #000'
         }}>
           <div style={{ flex: 1, minWidth: '280px' }}>
             <h4 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 900, color: 'var(--game-dark)' }}>
@@ -123,10 +122,8 @@ export default function Tracker() {
               Your streak is blazing! Don't let the flame go out—keep praying to stay on fire!
             </p>
 
-            {/* Weekly Days circles */}
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => {
-                // Mocking visual completed status matching mockup (M, T, W, T completed)
                 const isDayDone = i < 4; 
                 return (
                   <div 
@@ -148,14 +145,13 @@ export default function Tracker() {
             </div>
           </div>
 
-          {/* Claim Reward Button */}
           <button
             onClick={() => alert('Klaim Hadiah: Kunjungi menu Hadiah Streak di Dashboard Orang Tua Anda! 🎁')}
             className="clay-btn purple"
             style={{
               padding: '16px 28px', fontSize: '15px', border: '3.5px solid var(--game-dark)',
               boxShadow: '4px 4px 0 var(--game-dark)', background: 'var(--game-purple)',
-              color: '#fff', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px'
+              color: '#fff', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '16px', cursor: 'pointer'
             }}
           >
             <Trophy size={16} /> Claim Reward 🎉
@@ -166,11 +162,10 @@ export default function Tracker() {
     );
   }
 
-  // ─── ADULT/ADMIN CLEAN LAYOUT ───
+  // ADULT/ADMIN CLEAN LAYOUT
   return (
-    <div className="animate-fadeIn" style={{ padding: '16px' }}>
+    <div className="animate-fadeInUp" style={{ padding: '16px' }}>
       
-      {/* Title */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #E2E8F0', paddingBottom: '12px', marginBottom: '24px' }}>
         <Check size={20} style={{ color: '#065F46' }} />
         <h2 style={{ 
@@ -186,12 +181,11 @@ export default function Tracker() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', alignItems: 'start' }}>
         
         {/* Left: Daily Checklist */}
-        <div className="clay-card" style={{ background: '#fff', border: '1px solid #E2E8F0' }}>
+        <div style={{ background: '#fff', border: '2px solid #000', borderRadius: '16px', boxShadow: '4px 4px 0px #000', padding: '20px' }}>
           
-          {/* Today Summary */}
           <div style={{ 
             background: 'linear-gradient(135deg, #065f46 0%, #059669 100%)', 
-            color: 'white', border: 'none', padding: '16px', borderRadius: '10px', marginBottom: '16px' 
+            color: 'white', border: 'none', padding: '16px', borderRadius: '12px', marginBottom: '16px' 
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <div>
@@ -205,7 +199,6 @@ export default function Tracker() {
             </div>
           </div>
 
-          {/* Checklist Form */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {PRAYER_NAMES.map((prayer) => {
               const isDone = tracker && tracker[prayer.key];
@@ -226,11 +219,10 @@ export default function Tracker() {
                   
                   <button
                     onClick={() => togglePrayer(prayer.key)}
-                    className="clay-btn"
                     style={{
-                      padding: '4px 10px', fontSize: '11.5px',
-                      background: isDone ? '#6fff9d !important' : '#fff !important',
-                      border: '1px solid #CBD5E1'
+                      padding: '6px 12px', fontSize: '12px', fontWeight: 800,
+                      background: isDone ? '#6fff9d' : '#fff',
+                      border: '2px solid #000', borderRadius: '8px', cursor: 'pointer'
                     }}
                   >
                     {isDone ? 'Sudah ✓' : 'Absen'}
@@ -244,16 +236,14 @@ export default function Tracker() {
         {/* Right: Streak Calendar & Summary */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           
-          {/* Calendar */}
-          <div className="clay-card" style={{ background: '#fff', border: '1px solid #E2E8F0' }}>
+          <div style={{ background: '#fff', border: '2px solid #000', borderRadius: '16px', boxShadow: '4px 4px 0px #000', padding: '20px' }}>
             <h4 style={{ margin: '0 0 12px', fontSize: '14.5px', fontWeight: 800, color: '#1E293B' }}>
               📅 Kalender Absensi Sholat
             </h4>
             <StreakCalendar />
           </div>
 
-          {/* Summary Stats */}
-          <div className="clay-card" style={{ background: '#fff', border: '1px solid #E2E8F0', padding: '16px 20px' }}>
+          <div style={{ background: '#fff', border: '2px solid #000', borderRadius: '16px', boxShadow: '4px 4px 0px #000', padding: '16px 20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ fontSize: 32 }}>🔥</div>
               <div>

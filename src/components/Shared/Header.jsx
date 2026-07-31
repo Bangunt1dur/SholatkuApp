@@ -3,18 +3,13 @@ import { useApp } from '../../context/AppContext';
 import { Award, Star, Gem } from 'lucide-react';
 
 export default function Header() {
-  const { userMode, profile, currentUser, sidebarOpen, isMobile } = useApp();
+  const { userMode, profile, sidebarOpen, isMobile, isKidsMode } = useApp();
 
-  const isAdultTheme = userMode === 'adult' || userMode === 'parent' || userMode === 'admin';
-  const isKidsTheme = userMode === 'kids' && profile;
+  const isAdultTheme = userMode === 'adult' || userMode === 'parent' || userMode === 'admin' || !isKidsMode;
+  const isKidsTheme = (userMode === 'kids' || isKidsMode) && profile;
 
-  // Hitung paddingLeft secara dinamis:
-  // - Sidebar terbuka: 24px
-  // - Mobile + sidebar tertutup: 72px (muat tombol hamburger 54px + 18px gap)
-  // - Desktop + sidebar tertutup: 88px
   const headerPaddingLeft = sidebarOpen ? '24px' : (isMobile ? '72px' : '88px');
 
-  // Judul singkat di mobile agar tidak overflow
   const titleText = userMode === 'admin'
     ? (isMobile ? 'Admin 🛠️' : 'Panel Admin SholatKu 🛠️')
     : isAdultTheme
@@ -66,9 +61,8 @@ export default function Header() {
       </div>
 
       {/* GAMIFICATION HUD FOR KIDS */}
-      {isKidsTheme && (
+      {isKidsTheme && profile && (
         <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '4px' : '8px', flexShrink: 0 }}>
-
           {/* Level Badge */}
           <div
             className="clay-card purple"
@@ -81,7 +75,7 @@ export default function Header() {
           >
             <Award size={12} style={{ color: '#fff', flexShrink: 0 }} />
             <span style={{ fontSize: isMobile ? '11px' : '12px', fontWeight: 900, color: '#fff', whiteSpace: 'nowrap' }}>
-              Lv.{profile.level}
+              Lv.{profile.level || 1}
             </span>
           </div>
 
@@ -97,11 +91,11 @@ export default function Header() {
           >
             <Star size={12} fill="var(--game-dark)" style={{ color: 'var(--game-dark)', flexShrink: 0 }} />
             <span style={{ fontSize: isMobile ? '11px' : '12px', fontWeight: 900, color: 'var(--game-dark)', whiteSpace: 'nowrap' }}>
-              {profile.stars}⭐
+              {profile.stars || 0}⭐
             </span>
           </div>
 
-          {/* Gems Badge — hide on very small screens to save space */}
+          {/* Gems Badge */}
           {!isMobile && (
             <div
               className="clay-card"
@@ -115,7 +109,7 @@ export default function Header() {
             >
               <Gem size={12} fill="#fff" style={{ color: '#fff', flexShrink: 0 }} />
               <span style={{ fontSize: '12px', fontWeight: 900, color: '#fff', whiteSpace: 'nowrap' }}>
-                {profile.gems} 💎
+                {profile.gems || 0} 💎
               </span>
             </div>
           )}
